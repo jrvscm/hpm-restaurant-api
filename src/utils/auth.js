@@ -10,7 +10,7 @@ const generateToken = (user) => {
     if (process.env.JWT_EXPIRATION !== 'never') {
         options.expiresIn = process.env.JWT_EXPIRATION || '1h'; // Default to 1 hour
     }
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
     return jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_SECRET,

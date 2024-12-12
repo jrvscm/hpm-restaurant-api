@@ -1,3 +1,4 @@
+const childProcess = require('child_process');
 const express = require('express'); // Import Express
 const cors = require('cors'); // Import CORS middleware
 const protectedRoutes = require('./src/routes/protected'); // Import protected routes
@@ -7,7 +8,28 @@ const sequelize = require('./src/config/db'); // Import Sequelize instance
 const User = require('./src/models/User'); // Import User model
 const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./src/config/swagger');
+dotenv.config();
+
+// Conditionally check and start PostgreSQL in development
+if (process.env.NODE_ENV === 'development') {
+    try {
+        // Check if PostgreSQL is running
+        childProcess.execSync('pg_ctl -D /usr/local/var/postgresql@14 status', { stdio: 'ignore' });
+        console.log('PostgreSQL is already running.');
+    } catch {
+        try {
+            // Start PostgreSQL if not running
+            childProcess.execSync('pg_ctl -D /usr/local/var/postgresql@14 start', { stdio: 'ignore' });
+            console.log('Starting PostgreSQL...');
+        } catch (err) {
+            console.error('Failed to start PostgreSQL:', err.message);
+            process.exit(1); // Exit the app if PostgreSQL cannot start
+        }
+    }
+}
 
 // Seed data
 const seedDatabase = async () => {
@@ -61,6 +83,7 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Apply CORS middleware
 
 // Register routes
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use('/auth', authRoutes); // Register authentication routes
 app.use('/protected', protectedRoutes); // Register protected routes
 app.use('/announcements', announcementRoutes); // Register announcements routes
