@@ -15,6 +15,9 @@ const Announcement = sequelize.define('Announcement', {
         type: DataTypes.TEXT,
         allowNull: false,
     },
+}, {
+    timestamps: true, // Automatically adds createdAt and updatedAt
+    tableName: 'Announcements', // Optional: Explicit table name
 });
 
 module.exports = Announcement;

@@ -4,9 +4,15 @@ const cors = require('cors'); // Import CORS middleware
 const protectedRoutes = require('./src/routes/protected'); // Import protected routes
 const announcementRoutes = require('./src/routes/announcement'); // Import announcement routes
 const authRoutes = require('./src/routes/auth'); // Import auth routes
-const sequelize = require('./src/config/db'); // Import Sequelize instance
-const User = require('./src/models/User'); // Import User model
-const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
+const userManagementRoutes = require('./src/routes/userManagement');
+const messageRoutes = require('./src/routes/messages');
+const paymentRoutes = require('./src/routes/payment');
+const hoaInfoRoutes = require('./src/routes/hoaInfo');
+const dashboardRoutes = require('./src/routes/dashboard');
+const supportRoutes = require('./src/routes/support');
+const sequelize = require('./src/config/db'); 
+const User = require('./src/models/User'); 
+const bcrypt = require('bcrypt'); 
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
@@ -84,9 +90,15 @@ app.use(cors(corsOptions)); // Apply CORS middleware
 
 // Register routes
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-app.use('/auth', authRoutes); // Register authentication routes
-app.use('/protected', protectedRoutes); // Register protected routes
-app.use('/announcements', announcementRoutes); // Register announcements routes
+app.use('/auth', authRoutes);
+app.use('/protected', protectedRoutes); 
+app.use('/announcements', announcementRoutes); 
+app.use('/users', userManagementRoutes);
+app.use('/messages', messageRoutes);
+app.use('/payments', paymentRoutes);
+app.use('/info', hoaInfoRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/support', supportRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
