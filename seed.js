@@ -1,25 +1,40 @@
+const { User, Message, Announcement, SupportTicket, Payment, HOAInfo, Organization } = require('./src/models');
+const bcrypt = require('bcrypt'); 
 const sequelize = require('./src/config/db');
-const User = require('./src/models/User');
-const Message = require('./src/models/Message');
-const Announcement = require('./src/models/Announcement');
-const Support = require('./src/models/Support');
-const Payment = require('./src/models/Payment');
-const HOAInfo = require('./src/models/HOAInfo');
-const bcrypt = require('bcrypt'); // Import bcrypt for hashing passwords
 
 const seedDatabase = async () => {
     try {
-        await sequelize.sync({ force: true }); // Drops and recreates tables
+        // Seed Organizations
+        const organization = await Organization.create({ name: 'Neighborhood HQ' });
 
         // Seed Users
         const hashedAdminPassword = await bcrypt.hash('admin123', 10);
         const hashedUserPassword = await bcrypt.hash('user123', 10);
 
         const users = await User.bulkCreate([
-            { email: 'admin@example.com', password: hashedAdminPassword, role: 'admin' },
-            { email: 'user@example.com', password: hashedUserPassword, role: 'user' },
+            {
+                fullName: 'Admin User',
+                email: 'admin@example.com',
+                password: hashedAdminPassword,
+                role: 'admin',
+                organizationId: organization.id,
+                verificationToken: null,
+                resetToken: null,
+                resetTokenExpiry: null,
+            },
+            {
+                fullName: 'Regular User',
+                email: 'user@example.com',
+                password: hashedUserPassword,
+                role: 'user',
+                organizationId: organization.id,
+                verificationToken: null,
+                resetToken: null,
+                resetTokenExpiry: null,
+            },
         ]);
-        console.log('Users seeded successfully!');
+    
+        console.log('Users seeded successfully');
 
         // Seed Messages
         await Message.bulkCreate([
@@ -50,7 +65,7 @@ const seedDatabase = async () => {
         console.log('Announcements seeded successfully!');
 
         // Seed Support Tickets
-        await Support.bulkCreate([
+        await SupportTicket.bulkCreate([
             {
                 userId: users[1].id,
                 title: 'Issue with payment',
@@ -71,13 +86,13 @@ const seedDatabase = async () => {
             {
                 userId: users[1].id,
                 amount: 50.0,
-                dueDate: new Date(new Date().setDate(new Date().getDate() + 10)), // Due in 10 days
+                dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
                 status: 'pending',
             },
             {
                 userId: users[1].id,
                 amount: 75.0,
-                dueDate: new Date(new Date().setDate(new Date().getDate() + 20)), // Due in 20 days
+                dueDate: new Date(new Date().setDate(new Date().getDate() + 20)),
                 status: 'pending',
             },
         ]);
@@ -88,20 +103,23 @@ const seedDatabase = async () => {
             {
                 title: 'New Parking Rules',
                 content: 'Parking is not allowed on the streets overnight.',
+                createdBy: users[0].id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
             },
             {
                 title: 'Community BBQ Event',
                 content: 'Join us for a BBQ event on December 25th at the community park.',
+                createdBy: users[1].id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
             },
         ]);
         console.log('HOA Info seeded successfully!');
-
-        console.log('Database seeded with all required data!');
     } catch (err) {
-        console.error('Error seeding database:', err);
-    } finally {
-        process.exit();
+        console.error('Error seeding data:', err);
+        throw err;
     }
 };
 
-seedDatabase();
+module.exports = seedDatabase; // Export the function only

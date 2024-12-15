@@ -2,7 +2,121 @@
  * @swagger
  * tags:
  *   name: Authentication
- *   description: User authentication and management.
+ *   description: User authentication and organization management.
+ */
+
+/**
+ * @swagger
+ * /auth/register/organization:
+ *   post:
+ *     summary: Create a new organization and register the first admin user.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - organizationName
+ *               - email
+ *               - password
+ *               - fullName
+ *             properties:
+ *               organizationName:
+ *                 type: string
+ *                 example: Example Organization
+ *               email:
+ *                 type: string
+ *                 example: admin@example.com
+ *               password:
+ *                 type: string
+ *                 example: admin123
+ *               fullName:
+ *                 type: string
+ *                 example: John Doe
+ *     responses:
+ *       201:
+ *         description: Organization and admin registered successfully. Verification email sent.
+ *       400:
+ *         description: Validation error or organization name already in use.
+ *       500:
+ *         description: Server error.
+ */
+
+/**
+ * @swagger
+ * /auth/register/invite:
+ *   post:
+ *     summary: Register a user using an invitation token.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *               - token
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *               fullName:
+ *                 type: string
+ *                 example: Jane Doe
+ *               token:
+ *                 type: string
+ *                 example: abc123inviteToken
+ *     responses:
+ *       201:
+ *         description: User registered successfully. Verification email sent.
+ *       400:
+ *         description: Validation error or invalid/expired token.
+ *       500:
+ *         description: Server error.
+ */
+
+/**
+ * @swagger
+ * /auth/invite:
+ *   post:
+ *     summary: Admin invites a user to their organization.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - role
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               role:
+ *                 type: string
+ *                 enum: [admin, user]
+ *                 example: user
+ *     responses:
+ *       201:
+ *         description: Invitation sent successfully.
+ *       400:
+ *         description: Validation error.
+ *       403:
+ *         description: Only admins can invite users.
+ *       500:
+ *         description: Server error.
  */
 
 /**
@@ -37,69 +151,15 @@
  *                 role:
  *                   type: string
  *                   example: user
+ *                 organizationId:
+ *                   type: string
+ *                   example: 123e4567-e89b-12d3-a456-426614174000
  *       404:
  *         description: User not found.
  *       401:
  *         description: Invalid credentials.
  *       403:
  *         description: Account not verified.
- */
-
-/**
- * @swagger
- * /auth/register/admin:
- *   post:
- *     summary: Register a new admin user (admin only).
- *     tags: [Authentication]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: admin@example.com
- *               password:
- *                 type: string
- *                 example: admin123
- *               role:
- *                 type: string
- *                 example: admin
- *     responses:
- *       201:
- *         description: Admin registered successfully.
- *       400:
- *         description: Invalid role or email in use.
- */
-
-/**
- * @swagger
- * /auth/register/tenant:
- *   post:
- *     summary: Register a new tenant user.
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: tenant@example.com
- *               password:
- *                 type: string
- *                 example: password123
- *     responses:
- *       201:
- *         description: Tenant registered successfully.
- *       400:
- *         description: Invalid email or already in use.
  */
 
 /**
@@ -248,6 +308,13 @@
  *                       type: string
  *                     status:
  *                       type: string
+ *                     organizationId:
+ *                       type: string
+ *                     organization:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
  *       404:
  *         description: User not found.
  *       500:

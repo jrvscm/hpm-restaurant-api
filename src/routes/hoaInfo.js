@@ -1,6 +1,6 @@
 // routes/hoaInfo.js
 const express = require('express');
-const HOAInfo = require('../models/HOAInfo');
+const { HOAInfo } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 

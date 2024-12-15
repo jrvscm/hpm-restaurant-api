@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Ensure this points to your Sequelize instance
+const sequelize = require('../config/db'); 
 
 const User = sequelize.define(
     'User',
@@ -9,12 +9,23 @@ const User = sequelize.define(
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
+        fullName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: {
+                    msg: 'Full name is required.',
+                },
+            },
+        },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
             validate: {
-                isEmail: true,
+                isEmail: {
+                    msg: 'Must be a valid email address.',
+                },
             },
         },
         password: {
@@ -26,7 +37,7 @@ const User = sequelize.define(
             defaultValue: 'user',
         },
         status: {
-            type: DataTypes.ENUM('pending', 'verified'),
+            type: DataTypes.ENUM('pending', 'verified', 'invited'),
             defaultValue: 'pending',
         },
         verificationToken: {
@@ -41,10 +52,18 @@ const User = sequelize.define(
             type: DataTypes.DATE,
             allowNull: true,
         },
+        organizationId: {
+            type: DataTypes.UUID,
+            allowNull: true, 
+            references: {
+                model: 'Organizations',
+                key: 'id',
+            },
+        },
     },
     {
-        tableName: 'Users', // The table name in your database
-        timestamps: true, // Automatically adds createdAt and updatedAt fields
+        tableName: 'Users',
+        timestamps: true,
     }
 );
 

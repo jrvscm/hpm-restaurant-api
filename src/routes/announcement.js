@@ -1,5 +1,5 @@
 const express = require('express');
-const Announcement = require('../models/Announcement');
+const { Announcement } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 

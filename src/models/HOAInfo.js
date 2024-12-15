@@ -1,20 +1,60 @@
-// models/HOAInfo.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); // Adjust the path to your Sequelize instance
 
-const HOAInfo = sequelize.define('HOAInfo', {
+class HOAInfo extends Model {}
+
+HOAInfo.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     title: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     content: {
-        type: DataTypes.TEXT,
-        allowNull: false,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     createdBy: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Users', // Table name
+        key: 'id',
+      },
+      onDelete: 'CASCADE', // Adjust as needed
+      onUpdate: 'CASCADE',
     },
-});
+    organizationId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'Organizations', // Table name
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'HOAInfo',
+    tableName: 'HOAInfos', // Explicit table name
+    timestamps: true,
+  }
+);
 
 module.exports = HOAInfo;

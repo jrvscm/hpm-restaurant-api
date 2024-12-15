@@ -1,5 +1,5 @@
 const express = require('express');
-const SupportTicket = require('../models/SupportTicket'); // Model for support tickets
+const { SupportTicket } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 

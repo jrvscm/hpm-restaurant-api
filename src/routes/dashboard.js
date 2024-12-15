@@ -1,7 +1,5 @@
 const express = require('express');
-const User = require('../models/User');
-const Message = require('../models/Message');
-const Payment = require('../models/Payment');
+const { User, Message, Payment } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
