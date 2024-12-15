@@ -38,10 +38,57 @@
  *     responses:
  *       201:
  *         description: Organization and admin registered successfully. Verification email sent.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Organization and admin registered successfully. Verification email sent!
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for the admin user.
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: Admin user ID.
+ *                       example: 123e4567-e89b-12d3-a456-426614174000
+ *                     email:
+ *                       type: string
+ *                       description: Admin user email.
+ *                       example: admin@example.com
+ *                     role:
+ *                       type: string
+ *                       description: User role.
+ *                       example: admin
+ *                     organizationId:
+ *                       type: string
+ *                       description: ID of the registered organization.
+ *                       example: 987e6543-e21d-12d3-a456-426614174001
  *       400:
  *         description: Validation error or organization name already in use.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Organization name already in use.
  *       500:
  *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to register organization and admin.
  */
 
 /**

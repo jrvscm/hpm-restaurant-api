@@ -67,6 +67,12 @@ router.post('/register/organization', async (req, res) => {
         res.status(201).json({
             message: 'Organization and admin registered successfully. Verification email sent!',
             token,
+            user: {
+                id: admin.id,
+                email: admin.email,
+                role: admin.role,
+                organizationId: admin.organizationId,
+            },
         });
     } catch (err) {
         console.error(err);

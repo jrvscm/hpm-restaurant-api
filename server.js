@@ -58,9 +58,10 @@ app.use(limiter);
 
 // CORS Configuration
 const corsOptions = {
-    origin: ['*'], // TODO: Replace with your frontend's URL once integration!!!
+    origin: ['http://localhost:3000'], // TODO: Replace with your frontend's URL once integration!!!
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    credentials: true
 };
 app.use(cors(corsOptions)); // Apply CORS middleware
 
