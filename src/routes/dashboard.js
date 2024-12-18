@@ -1,9 +1,12 @@
 const express = require('express');
 const { User, Message, Payment } = require('../models');
+const { getDashboardData } = require('../controllers/dashboard');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
 const router = express.Router();
+
+router.get('/', authenticate, getDashboardData);
 
 router.get('/users', authenticate, authorize(['admin']), async (req, res) => {
     try {

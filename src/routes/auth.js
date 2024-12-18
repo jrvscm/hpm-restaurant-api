@@ -15,10 +15,10 @@ const router = express.Router();
  * Create an organization and register the first admin user.
  */
 router.post('/register/organization', async (req, res) => {
-    const { organizationName, email, password, fullName } = req.body;
+    const { organizationName, email, password, fullName, phone } = req.body;
 
     // Validate required fields
-    if (!organizationName || !email || !password || !fullName) {
+    if (!organizationName || !email || !password || !fullName || !phone) {
         return res.status(400).json({
             error: 'Organization name, email, password, and full name are required.',
         });
@@ -48,9 +48,10 @@ router.post('/register/organization', async (req, res) => {
             role: 'admin',
             status: 'pending',
             organizationId: organization.id,
+            phone,
             verificationToken,
         });
-
+        
         // Generate a JWT token for the new admin
         const token = generateToken(admin);
 
@@ -72,6 +73,10 @@ router.post('/register/organization', async (req, res) => {
                 email: admin.email,
                 role: admin.role,
                 organizationId: admin.organizationId,
+                // Add the verificationToken in development mode
+                ...(process.env.NODE_ENV === 'development' && {
+                    verificationToken
+                })
             },
         });
     } catch (err) {

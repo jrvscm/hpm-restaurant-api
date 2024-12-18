@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); 
+const sequelize = require('../config/db');
 
 const User = sequelize.define(
     'User',
@@ -25,6 +25,19 @@ const User = sequelize.define(
             validate: {
                 isEmail: {
                     msg: 'Must be a valid email address.',
+                },
+            },
+        },
+        phone: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: {
+                    msg: 'Phone number is required.',
+                },
+                is: {
+                    args: /^[0-9\-\+\s]*$/,
+                    msg: 'Phone number must contain only numbers, spaces, dashes, or plus signs.',
                 },
             },
         },
@@ -54,7 +67,7 @@ const User = sequelize.define(
         },
         organizationId: {
             type: DataTypes.UUID,
-            allowNull: true, 
+            allowNull: true,
             references: {
                 model: 'Organizations',
                 key: 'id',

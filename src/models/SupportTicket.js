@@ -29,6 +29,14 @@ const SupportTicket = sequelize.define('SupportTicket', {
         type: DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
         defaultValue: 'open',
     },
+    organizationId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Organizations',
+            key: 'id',
+        },
+    },
 }, {
     timestamps: true, // Automatically adds createdAt and updatedAt
 });

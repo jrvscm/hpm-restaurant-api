@@ -12,7 +12,7 @@ const generateToken = (user) => {
     }
 
     return jwt.sign(
-        { id: user.id, role: user.role },
+        { id: user.id, role: user.role, organizationId: user.organizationId },
         process.env.JWT_SECRET,
         options
     );
