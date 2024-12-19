@@ -2,7 +2,6 @@ const { User, Organization, Announcement, Payment, Message, SupportTicket, HOAIn
 
 const getDashboardData = async (req, res) => {
     try {
-        console.log(req)
         const { organizationId } = req.user;
 
         if (!organizationId) {
