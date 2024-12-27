@@ -73,7 +73,7 @@ router.post('/register/organization', async (req, res) => {
         });
 
         // Construct the verification email
-        const verificationUrl = `${process.env.FRONTEND_URL}/auth/verify/${verificationToken}`;
+        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
         if(process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
         } else {
@@ -211,44 +211,38 @@ router.post('/login', async (req, res) => {
  */
 router.get('/verify/:token', async (req, res) => {
     try {
-        const { token } = req.params;
-
-        // Find the user by the verification token
-        const user = await User.findOne({ where: { verificationToken: token } });
-
-        if (!user) {
-            // Redirect to the frontend app with a failure message
-            return res.redirect(`${process.env.FRONTEND_URL}/verification-failed`);
-        }
-
-        // Update the user's status and clear the verification token
-        user.status = 'verified';
-        user.verificationToken = null;
-        await user.save();
-        
-        // Generate a new JWT with updated user data
-        const updatedToken = generateToken({
-            id: user.id,
-            role: user.role,
-            organizationId: user.organizationId,
-            status: user.status, 
-        });
-
-        // Set the updated token as a cookie
-        res.cookie('token', updatedToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 1000, // 1 hour
-        });
-
-        // Redirect to the frontend app with a success message
-        res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+      const { token } = req.params;
+  
+      const user = await User.findOne({ where: { verificationToken: token } });
+  
+      if (!user) {
+        return res.redirect(`${process.env.FRONTEND_URL}/verification?failed=1`);
+      }
+  
+      user.status = 'verified';
+      user.verificationToken = null;
+      await user.save();
+  
+      const updatedToken = generateToken({
+        id: user.id,
+        role: user.role,
+        organizationId: user.organizationId,
+        status: user.status,
+      });
+  
+      res.cookie('token', updatedToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000,
+      });
+  
+        res.redirect(`${process.env.FRONTEND_URL}/verification?success=1`);
     } catch (err) {
-        // Redirect to the frontend app with a failure message
-        res.redirect(`${process.env.FRONTEND_URL}/verification-failed`);
+      res.redirect(`${process.env.FRONTEND_URL}/verification?failed=1`);
     }
-});
+  });
+  
 
 /**
  * Resend the verification email.
@@ -282,7 +276,7 @@ router.post('/resend-verification', async (req, res) => {
         });
 
         // Construct the verification email
-        const verificationUrl = `${process.env.FRONTEND_URL}/auth/verify/${verificationToken}`;
+        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
         if(process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
         }
