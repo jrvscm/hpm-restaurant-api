@@ -1,11 +1,13 @@
-const { 
-    User, 
-    Message, 
-    Announcement, 
-    SupportTicket, 
-    Payment, 
-    HOAInfo, 
-    Organization 
+const {
+    User,
+    Message,
+    Announcement,
+    SupportTicket,
+    Payment,
+    HOAInfo,
+    Organization,
+    Availability,
+    Reservation,
 } = require('./src/models');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
@@ -13,7 +15,9 @@ const crypto = require('crypto');
 const seedDatabase = async () => {
     try {
         // Seed Organizations
-        const organization = await Organization.create({ name: 'Neighborhood HQ' });
+        const organization = await Organization.create({
+            name: 'Neighborhood HQ',
+        });
 
         // Seed Users
         const hashedAdminPassword = await bcrypt.hash('admin123', 10);
@@ -29,8 +33,8 @@ const seedDatabase = async () => {
                 password: hashedAdminPassword,
                 role: 'admin',
                 organizationId: organization.id,
-                status: 'verified', // Set the status to 'verified' to simulate a verified admin
-                verificationToken: null, // Admin is already verified
+                status: 'verified',
+                verificationToken: null,
                 phone: '3334445555',
                 resetToken: null,
                 resetTokenExpiry: null,
@@ -41,8 +45,8 @@ const seedDatabase = async () => {
                 password: hashedAdminPassword,
                 role: 'admin',
                 organizationId: organization.id,
-                status: 'pending', // Pending status for unverified admin
-                verificationToken, // Use the generated verification token
+                status: 'pending',
+                verificationToken,
                 phone: '3334445555',
                 resetToken: null,
                 resetTokenExpiry: null,
@@ -136,19 +140,58 @@ const seedDatabase = async () => {
                 title: 'New Parking Rules',
                 content: 'Parking is not allowed on the streets overnight.',
                 createdBy: users[0].id,
-                createdAt: new Date(),
-                updatedAt: new Date(),
             },
             {
                 organizationId: organization.id,
                 title: 'Community BBQ Event',
                 content: 'Join us for a BBQ event on December 25th at the community park.',
                 createdBy: users[1].id,
-                createdAt: new Date(),
-                updatedAt: new Date(),
             },
         ]);
         console.log('HOA Info seeded successfully!');
+
+        // Seed Availability
+        await Availability.bulkCreate([
+            {
+                organizationId: organization.id,
+                date: '2024-12-26',
+                startTime: '18:00',
+                endTime: '22:00',
+                maxGuests: 20,
+            },
+            {
+                organizationId: organization.id,
+                date: '2024-12-27',
+                startTime: '12:00',
+                endTime: '15:00',
+                maxGuests: 15,
+            },
+        ]);
+        console.log('Availability seeded successfully!');
+
+        // Seed Reservations
+        await Reservation.bulkCreate([
+            {
+                organizationId: organization.id,
+                userId: users[2].id,
+                date: '2024-12-26',
+                time: '19:00',
+                guests: 4,
+                notes: 'First-time visitors',
+                status: 'confirmed',
+            },
+            {
+                organizationId: organization.id,
+                userId: users[2].id,
+                date: '2024-12-27',
+                time: '13:00',
+                guests: 2,
+                notes: 'Birthday celebration',
+                status: 'pending',
+            },
+        ]);
+        console.log('Reservations seeded successfully!');
+
     } catch (err) {
         console.error('Error seeding data:', err);
         throw err;

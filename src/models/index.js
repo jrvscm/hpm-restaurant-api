@@ -5,6 +5,8 @@ const Announcement = require('./Announcement');
 const SupportTicket = require('./SupportTicket');
 const Payment = require('./Payment');
 const HOAInfo = require('./HOAInfo');
+const Availability = require('./Availability');
+const Reservation = require('./Reservation');
 
 // Define associations
 Organization.hasMany(User, { foreignKey: 'organizationId', as: 'users' });
@@ -25,6 +27,17 @@ Message.belongsTo(User, { foreignKey: 'recipientId', as: 'messageRecipient' });
 User.hasMany(SupportTicket, { foreignKey: 'userId', as: 'supportTickets' });
 User.hasMany(Payment, { foreignKey: 'userId', as: 'payments' });
 
+// Organization associations
+Organization.hasMany(Availability, { foreignKey: 'organizationId' });
+Organization.hasMany(Reservation, { foreignKey: 'organizationId' });
+
+// Availability associations
+Availability.belongsTo(Organization, { foreignKey: 'organizationId' });
+
+// Reservation associations
+Reservation.belongsTo(Organization, { foreignKey: 'organizationId' });
+Reservation.belongsTo(User, { foreignKey: 'userId' });
+
 // Export all models
 module.exports = {
     User,
@@ -34,4 +47,6 @@ module.exports = {
     SupportTicket,
     Payment,
     HOAInfo,
+    Availability,
+    Reservation
 };

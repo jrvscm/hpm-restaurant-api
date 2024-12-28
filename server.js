@@ -18,6 +18,8 @@ const paymentRoutes = require('./src/routes/payment');
 const hoaInfoRoutes = require('./src/routes/hoaInfo');
 const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
+const reservationRoutes = require('./src/routes/reservation');
+
 
 // Initialize dotenv for environment configuration
 dotenv.config();
@@ -78,6 +80,7 @@ app.use('/payments', paymentRoutes);
 app.use('/info', hoaInfoRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/support', supportRoutes);
+app.use('/reservation', reservationRoutes);
 
 // Sync database and seed data
 (async () => {
