@@ -199,7 +199,17 @@ router.post('/login', async (req, res) => {
 
         const token = generateToken(user);
 
-        res.status(200).json({ token, role: user.role, organizationId: user.organizationId });
+        // Set the token as a cookie
+        res.cookie('token', token, {
+            httpOnly: true, // Secure against XSS attacks
+            secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+            sameSite: 'strict', // Prevent CSRF attacks
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            path: '/',
+        });
+
+        // Send the response with additional user details if needed
+        res.status(200).json({ message: 'Login successful', role: user.role, organizationId: user.organizationId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to log in user.' });
