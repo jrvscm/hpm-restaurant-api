@@ -7,6 +7,8 @@ const swaggerSpecs = require('./src/config/swagger'); // Swagger configuration
 const sequelize = require('./src/config/db'); // Sequelize database connection
 const childProcess = require('child_process'); // For managing PostgreSQL process
 const seedDatabase = require('./seed'); // Database seeding function
+const { Server } = require('socket.io'); // Socket.IO for real-time updates
+const http = require('http'); // For creating the HTTP server
 
 // Import routes
 const protectedRoutes = require('./src/routes/protected');
@@ -19,7 +21,6 @@ const hoaInfoRoutes = require('./src/routes/hoaInfo');
 const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
 const reservationRoutes = require('./src/routes/reservation');
-
 
 // Initialize dotenv for environment configuration
 dotenv.config();
@@ -42,8 +43,33 @@ if (process.env.NODE_ENV === 'development') {
     }
 }
 
-// Initialize the Express app
+// Initialize the Express app and HTTP server
 const app = express();
+const server = http.createServer(app); // Create HTTP server for Socket.IO
+
+// Initialize Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:3000'], // Replace with your frontend URL in production
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        credentials: true, // Allow credentials
+    },
+});
+
+// Attach Socket.IO to app for access in routes
+app.set('io', io);
+//assign to the correct organization
+io.on('connection', (socket) => {
+    console.log('SOCKET:', socket)
+    const organizationId = socket.handshake.query.organizationId;
+
+    if (organizationId) {
+        socket.join(`organization:${organizationId}`);
+        console.log(`Socket ${socket.id} joined room organization:${organizationId}`);
+    } else {
+        console.warn(`Socket ${socket.id} connected without an organizationId.`);
+    }
+});
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -63,7 +89,7 @@ const corsOptions = {
     origin: ['http://localhost:3000'], // TODO: Replace with your frontend's URL once integration!!!
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-    credentials: true
+    credentials: true,
 };
 app.use(cors(corsOptions)); // Apply CORS middleware
 
@@ -99,6 +125,6 @@ app.use('/reservation', reservationRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

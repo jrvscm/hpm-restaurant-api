@@ -117,6 +117,12 @@ router.post('/reservations', authenticate, async (req, res) => {
             status: 'pending', // Default status
         });
 
+        const io = req.app.get('io'); 
+        const organizationRoom = `organization:${req.user.organizationId}`;
+        console.log('organizationRoom', organizationRoom)
+        // Emit events to the organizations clients
+        io.to(organizationRoom).emit('reservation:created', reservation);
+
         // Respond with the created reservation
         res.status(201).json(reservation);
     } catch (err) {
