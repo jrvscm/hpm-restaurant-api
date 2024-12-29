@@ -178,4 +178,53 @@ router.get('/reservations/user', authenticate, async (req, res) => {
     }
 });
 
+/**
+ * Public-facing endpoint to create a reservation.
+ */
+router.post('/reservations/public', async (req, res) => {
+    const { date, time, guests, notes, organizationId, apiKey } = req.body;
+
+    // Validate required fields
+    if (!date || !time || !guests || !organizationId || !apiKey) {
+        return res.status(400).json({
+            error: 'Date, time, guests, organizationId, and apiKey are required.',
+        });
+    }
+
+    try {
+        // Validate the API key
+        const organization = await Organization.findOne({
+            where: { id: organizationId, apiKey },
+        });
+
+        if (!organization) {
+            return res.status(403).json({
+                error: 'Invalid API key or organization ID.',
+            });
+        }
+
+        // Create the reservation
+        const reservation = await Reservation.create({
+            organizationId,
+            date,
+            time,
+            guests,
+            notes,
+            status: 'pending', // Default status
+        });
+
+        const io = req.app.get('io');
+        const organizationRoom = `organization:${organizationId}`;
+
+        // Emit real-time updates to the organization room
+        io.to(organizationRoom).emit('reservation:created', reservation);
+
+        res.status(201).json(reservation);
+    } catch (err) {
+        console.error('Failed to create reservation:', err);
+        res.status(500).json({ error: 'Failed to create reservation.' });
+    }
+});
+
+
 module.exports = router;

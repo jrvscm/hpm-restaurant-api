@@ -14,10 +14,16 @@ const crypto = require('crypto');
 
 const seedDatabase = async () => {
     try {
+        // Generate an API key
+        // const apiKey = crypto.randomBytes(32).toString('hex');
+        const apiKey = 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35';
         // Seed Organizations
         const organization = await Organization.create({
             name: 'Neighborhood HQ',
+            apiKey, // Add API key to the organization
         });
+        console.log(organization)
+        console.log('Organization seeded successfully with API key:', apiKey);
 
         // Seed Users
         const hashedAdminPassword = await bcrypt.hash('admin123', 10);

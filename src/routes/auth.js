@@ -11,14 +11,13 @@ const router = express.Router();
 /**
  * Create an organization and register the first admin user.
  */
-
 router.post('/register/organization', async (req, res) => {
     const { organizationName, email, password, fullName, phone } = req.body;
 
     // Validate required fields
     if (!organizationName || !email || !password || !fullName || !phone) {
         return res.status(400).json({
-            error: 'Organization name, email, password, and full name are required.',
+            error: 'Organization name, email, password, full name, and phone are required.',
         });
     }
 
@@ -29,8 +28,14 @@ router.post('/register/organization', async (req, res) => {
             return res.status(400).json({ error: 'Organization name already in use.' });
         }
 
+        // Generate an API key
+        const apiKey = crypto.randomBytes(32).toString('hex');
+
         // Create the organization
-        const organization = await Organization.create({ name: organizationName });
+        const organization = await Organization.create({ 
+            name: organizationName,
+            apiKey, // Include API key in the organization
+        });
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,7 +65,7 @@ router.post('/register/organization', async (req, res) => {
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000, // 1 hour
         });
-        
+
         // Set up Nodemailer transporter for production
         const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -74,7 +79,7 @@ router.post('/register/organization', async (req, res) => {
 
         // Construct the verification email
         const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
-        if(process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
         } else {
             const mailOptions = {
@@ -94,6 +99,11 @@ router.post('/register/organization', async (req, res) => {
         res.status(201).json({
             message: 'Organization and admin registered successfully. Verification email sent!',
             token,
+            organization: {
+                id: organization.id,
+                name: organization.name,
+                apiKey, // Include API key in the response
+            },
             user: {
                 id: admin.id,
                 email: admin.email,
@@ -106,6 +116,7 @@ router.post('/register/organization', async (req, res) => {
         res.status(500).json({ error: 'Failed to register organization and admin.' });
     }
 });
+
 
 /**
  * Register a tenant or invited admin to an existing organization.
