@@ -21,6 +21,7 @@ const hoaInfoRoutes = require('./src/routes/hoaInfo');
 const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
 const reservationRoutes = require('./src/routes/reservation');
+const availabilityRoutes = require('./src/routes/availability');
 
 // Initialize dotenv for environment configuration
 dotenv.config();
@@ -60,7 +61,6 @@ const io = new Server(server, {
 app.set('io', io);
 //assign to the correct organization
 io.on('connection', (socket) => {
-    console.log('SOCKET:', socket)
     const organizationId = socket.handshake.query.organizationId;
 
     if (organizationId) {
@@ -107,6 +107,7 @@ app.use('/info', hoaInfoRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/support', supportRoutes);
 app.use('/reservation', reservationRoutes);
+app.use('/availability', availabilityRoutes);
 
 // Sync database and seed data
 (async () => {

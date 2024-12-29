@@ -1,78 +1,39 @@
-const { DataTypes } = require('sequelize');
+// Availability Model using class syntax
+const { Model, DataTypes } = require('sequelize');
+const Organization = require('./Organization');
 const sequelize = require('../config/db');
 
-const Availability = sequelize.define('Availability', {
+class Availability extends Model {}
+
+Availability.init(
+  {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
     },
     organizationId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: 'Organizations',
-            key: 'id',
-        },
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Organizations',
+        key: 'id',
+      },
     },
-    date: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'Date is required.',
-            },
-            isDate: {
-                msg: 'Must be a valid date.',
-            },
-        },
+    availabilityData: {
+      type: DataTypes.JSONB,
+      allowNull: false,
     },
-    startTime: {
-        type: DataTypes.TIME,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'Start time is required.',
-            },
-            is: {
-                args: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-                msg: 'Start time must be in HH:MM format.',
-            },
-        },
-    },
-    endTime: {
-        type: DataTypes.TIME,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'End time is required.',
-            },
-            is: {
-                args: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-                msg: 'End time must be in HH:MM format.',
-            },
-        },
-    },
-    maxGuests: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: 'Max guests must be an integer.',
-            },
-            min: {
-                args: 1,
-                msg: 'Max guests must be at least 1.',
-            },
-        },
-    },
-    blocked: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    },
-}, {
+  },
+  {
+    sequelize,
+    modelName: 'Availability',
+    tableName: 'availability',
     timestamps: true,
-});
+  }
+);
+
+Availability.belongsTo(Organization, { foreignKey: 'organizationId' });
 
 module.exports = Availability;

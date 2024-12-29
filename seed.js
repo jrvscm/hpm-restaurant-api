@@ -15,14 +15,15 @@ const crypto = require('crypto');
 const seedDatabase = async () => {
     try {
         // Generate an API key
-        // const apiKey = crypto.randomBytes(32).toString('hex');
-        const apiKey = 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35';
+        let apiKey = crypto.randomBytes(32).toString('hex');
+        //TODO: overwrite for local testing, remove before launch
+        apiKey = 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35';
         // Seed Organizations
         const organization = await Organization.create({
             name: 'Neighborhood HQ',
             apiKey, // Add API key to the organization
         });
-        console.log(organization)
+        console.log('ORGANIZATION ID:', organization.id)
         console.log('Organization seeded successfully with API key:', apiKey);
 
         // Seed Users
@@ -156,23 +157,21 @@ const seedDatabase = async () => {
         ]);
         console.log('HOA Info seeded successfully!');
 
-        // Seed Availability
-        await Availability.bulkCreate([
-            {
-                organizationId: organization.id,
-                date: '2024-12-26',
-                startTime: '18:00',
-                endTime: '22:00',
-                maxGuests: 20,
-            },
-            {
-                organizationId: organization.id,
-                date: '2024-12-27',
-                startTime: '12:00',
-                endTime: '15:00',
-                maxGuests: 15,
-            },
-        ]);
+        // Seed Availability for all days of the week (now as a single object)
+        const availabilityData = {
+            Monday: { startTime: '09:00', endTime: '17:00' },
+            Tuesday: { startTime: '09:00', endTime: '17:00' },
+            Wednesday: { startTime: '09:00', endTime: '17:00' },
+            Thursday: { startTime: '09:00', endTime: '17:00' },
+            Friday: { startTime: '09:00', endTime: '17:00' },
+            Saturday: { startTime: '09:00', endTime: '17:00' },
+            Sunday: { startTime: '09:00', endTime: '17:00' }
+        };
+
+        await Availability.create({
+            organizationId: organization.id,
+            availabilityData: availabilityData, // Storing the availability data as JSON
+        });
         console.log('Availability seeded successfully!');
 
         // Seed Reservations

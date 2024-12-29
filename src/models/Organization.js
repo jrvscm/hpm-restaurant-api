@@ -1,8 +1,9 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Organization = sequelize.define(
-    'Organization',
+class Organization extends Model {}
+
+Organization.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -113,8 +114,18 @@ const Organization = sequelize.define(
                 },
             },
         },
+        openTime: {
+            type: DataTypes.TIME,
+            defaultValue: '09:00',
+        },
+        closeTime: {
+            type: DataTypes.TIME,
+            defaultValue: '21:00',
+        },
     },
     {
+        sequelize, // Pass the sequelize instance here
+        modelName: 'Organization',
         timestamps: true, // Adds createdAt and updatedAt
     }
 );
