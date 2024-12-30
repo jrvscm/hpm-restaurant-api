@@ -3,6 +3,7 @@ const { Availability, Reservation, Organization, User } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 
 /**
  * Get all reservations for an organization (Admin only).
@@ -118,12 +119,12 @@ router.get('/reservations/user', authenticate, async (req, res) => {
  * Public-facing endpoint to create a reservation.
  */
 router.post('/reservations/public', async (req, res) => {
-    const { date, time, guests, notes, organizationId, apiKey } = req.body;
+    const { date, time, guests, notes, organizationId, apiKey, customerEmail } = req.body;
 
     // Validate required fields
     if (!date || !time || !guests || !organizationId || !apiKey) {
         return res.status(400).json({
-            error: 'Date, time, guests, organizationId, and apiKey are required.',
+            error: 'Date, time, guests, organizationId, apiKey, and customerEmail are required.',
         });
     }
 
@@ -154,6 +155,32 @@ router.post('/reservations/public', async (req, res) => {
 
         // Emit real-time updates to the organization room
         io.to(organizationRoom).emit('reservation:created', reservation);
+
+        // Set up Nodemailer transporter for production
+        const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+            auth: {
+                user: process.env.SMTP_USER, // SMTP username
+                pass: process.env.SMTP_PASS, // SMTP password
+            },
+        });
+
+        // Construct the pending reservation email
+        const mailOptions = {
+            from: '"My App" <noreply@myapp.com>', // Sender address
+            to: customerEmail, // Recipient email (the customer's email)
+            subject: 'Your Reservation is Pending',
+            text: `Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation. We will notify you once it has been confirmed.`,
+            html: `<p>Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation.</p>
+                <p>We will notify you once it has been confirmed.</p>`,
+        };
+
+        // Send the email
+        if (process.env.NODE_ENV !== 'development') {
+            await transporter.sendMail(mailOptions);
+        }
 
         res.status(201).json(reservation);
     } catch (err) {
