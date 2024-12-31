@@ -10,24 +10,28 @@ const nodemailer = require('nodemailer');
  */
 router.get('/reservations', authenticate, authorize(['admin']), async (req, res) => {
     try {
-        const organizationId = req?.user?.organizationId;
-
-        if (!organizationId) {
-            return res.status(400).json({ error: 'Organization ID is missing in session.' });
-        }
-
-        const reservations = await Reservation.findAll({
-            where: { organizationId },
-            include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
-            order: [['date', 'DESC']]
-        });
-
-        res.status(200).json(reservations);
+      const organizationId = req?.user?.organizationId;
+  
+      if (!organizationId) {
+        return res.status(400).json({ error: 'Organization ID is missing in session.' });
+      }
+  
+      const reservations = await Reservation.findAll({
+        where: { organizationId },
+        include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
+        order: [
+          ['date', 'ASC'], // Sort by date (most recent first)
+          ['time', 'ASC']   // Then sort by time (earliest first)
+        ]
+      });
+  
+      res.status(200).json(reservations);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to retrieve reservations.' });
+      console.error(err);
+      res.status(500).json({ error: 'Failed to retrieve reservations.' });
     }
-});
+  });
+  
  
 /**
  * Create a reservation (User).
