@@ -53,7 +53,7 @@ const io = new Server(server, {
     cors: {
         origin: ['http://localhost:3000'], // Replace with your frontend URL in production
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true, // Allow credentials
+        credentials: true, 
     },
 });
 
@@ -87,8 +87,8 @@ app.use(limiter);
 // CORS Configuration
 const corsOptions = {
     origin: ['http://localhost:3000'], // TODO: Replace with your frontend's URL once integration!!!
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization', 'apiKey', 'credentials', 'organizationId'],
     credentials: true,
 };
 app.use(cors(corsOptions)); // Apply CORS middleware

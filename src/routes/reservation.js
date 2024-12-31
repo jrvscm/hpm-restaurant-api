@@ -1,5 +1,5 @@
 const express = require('express');
-const { Availability, Reservation, Organization, User } = require('../models');
+const { Reservation, Organization, User } = require('../models');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 const router = express.Router();
@@ -10,8 +10,8 @@ const nodemailer = require('nodemailer');
  */
 router.get('/reservations', authenticate, authorize(['admin']), async (req, res) => {
     try {
-        const organizationId = req?.user?.organizationId; // Extracted from session
-        console.log('organizationId:', organizationId)
+        const organizationId = req?.user?.organizationId;
+
         if (!organizationId) {
             return res.status(400).json({ error: 'Organization ID is missing in session.' });
         }
@@ -19,6 +19,7 @@ router.get('/reservations', authenticate, authorize(['admin']), async (req, res)
         const reservations = await Reservation.findAll({
             where: { organizationId },
             include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
+            order: [['date', 'DESC']]
         });
 
         res.status(200).json(reservations);
@@ -45,18 +46,18 @@ router.post('/reservations', authenticate, async (req, res) => {
     try {
         // Use `req.user` for organizationId and userId
         const reservation = await Reservation.create({
-            organizationId: req.user.organizationId, // Set by authenticate middleware
-            userId: req.user.id, // Set by authenticate middleware
+            organizationId: req.user.organizationId, 
+            userId: req.user.id, 
             date,
             time,
             guests,
             notes,
-            status: 'pending', // Default status
+            status: 'pending',
         });
 
         const io = req.app.get('io'); 
         const organizationRoom = `organization:${req.user.organizationId}`;
-        console.log('organizationRoom', organizationRoom)
+
         // Emit events to the organizations clients
         io.to(organizationRoom).emit('reservation:created', reservation);
 
@@ -119,12 +120,12 @@ router.get('/reservations/user', authenticate, async (req, res) => {
  * Public-facing endpoint to create a reservation.
  */
 router.post('/reservations/public', async (req, res) => {
-    const { date, time, guests, notes, organizationId, apiKey, customerEmail } = req.body;
+    const { date, time, guests, notes, organizationId, apiKey, email } = req.body;
 
     // Validate required fields
-    if (!date || !time || !guests || !organizationId || !apiKey) {
+    if (!date || !time || !guests || !organizationId || !apiKey || !email) {
         return res.status(400).json({
-            error: 'Date, time, guests, organizationId, apiKey, and customerEmail are required.',
+            error: 'Date, time, guests, organizationId, customerEmail are required.',
         });
     }
 
@@ -170,7 +171,7 @@ router.post('/reservations/public', async (req, res) => {
         // Construct the pending reservation email
         const mailOptions = {
             from: '"My App" <noreply@myapp.com>', // Sender address
-            to: customerEmail, // Recipient email (the customer's email)
+            to: email, // Recipient email (the customer's email)
             subject: 'Your Reservation is Pending',
             text: `Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation. We will notify you once it has been confirmed.`,
             html: `<p>Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation.</p>

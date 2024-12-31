@@ -36,6 +36,63 @@ router.get('/', authenticate, authorize(['admin']), async (req, res) => {
   }
 });
 
+
+/**
+ * Get organizations availability (public/apiKey).
+ */
+
+router.get('/public', async (req, res) => {
+  try {
+    // Verify API key from the request headers
+    // apikey comes in lower cased from headers so rename it
+    const { apikey: apiKey, organizationid: organizationId } = req.headers;
+
+    // Check if the API key is provided and valid
+    if (!apiKey) {
+      return res.status(401).json({ error: 'Unauthorized access. No api key provided.' });
+    }
+
+    // Validate the API key
+    const organization = await Organization.findOne({
+      where: { id: organizationId, apiKey },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: 'Organization not found.' });
+    }
+
+    // Fetch the availability data for the organization
+    const availability = await Availability.findOne({
+      where: { organizationId: organization.id },
+    });
+
+    if (!availability) {
+      return res.status(404).json({ error: 'Availability not found' });
+    }
+
+    // Access the availability data directly (no need for JSON.parse)
+    const availabilityData = availability.availabilityData;
+
+    // Sort the availability by day of the week (Monday to Sunday)
+    const sortedAvailability = Object.entries(availabilityData)
+      .sort(([dayA], [dayB]) => {
+        const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        return dayOrder.indexOf(dayA) - dayOrder.indexOf(dayB);
+      })
+      .map(([day, times]) => ({
+        dayOfWeek: day,
+        startTime: times.startTime,
+        endTime: times.endTime,
+      }));
+
+    res.status(200).json(sortedAvailability);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to retrieve availability.' });
+  }
+});
+
+
 /**
  * Create availability slots (Admin only).
  */

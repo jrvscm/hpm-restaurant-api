@@ -23,8 +23,6 @@ const seedDatabase = async () => {
             name: 'Neighborhood HQ',
             apiKey, // Add API key to the organization
         });
-        console.log('ORGANIZATION ID:', organization.id)
-        console.log('Organization seeded successfully with API key:', apiKey);
 
         // Seed Users
         const hashedAdminPassword = await bcrypt.hash('admin123', 10);
@@ -196,6 +194,8 @@ const seedDatabase = async () => {
             },
         ]);
         console.log('Reservations seeded successfully!');
+        console.log('ORGANIZATION ID:', organization.id)
+        console.log('APIKEY:', apiKey);
 
     } catch (err) {
         console.error('Error seeding data:', err);
