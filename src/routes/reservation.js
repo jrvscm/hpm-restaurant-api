@@ -31,17 +31,16 @@ router.get('/reservations', authenticate, authorize(['admin']), async (req, res)
       res.status(500).json({ error: 'Failed to retrieve reservations.' });
     }
   });
-  
  
 /**
  * Create a reservation (User).
  */
 router.post('/reservations', authenticate, async (req, res) => {
     // Extract relevant fields from the request body
-    const { date, time, guests, notes } = req.body;
+    const { date, time, guests, notes, phoneNumber } = req.body;
 
     // Validate required fields
-    if (!date || !time || !guests) {
+    if (!date || !time || !guests, !phoneNumber) {
         return res.status(400).json({
             error: 'Date, time, and guests are required.',
         });
@@ -56,6 +55,7 @@ router.post('/reservations', authenticate, async (req, res) => {
             time,
             guests,
             notes,
+            phoneNumber,
             status: 'pending',
         });
 
@@ -124,12 +124,12 @@ router.get('/reservations/user', authenticate, async (req, res) => {
  * Public-facing endpoint to create a reservation.
  */
 router.post('/reservations/public', async (req, res) => {
-    const { date, time, guests, notes, organizationId, apiKey, email } = req.body;
+    const { date, time, guests, notes, organizationId, apiKey, phoneNumber } = req.body;
 
     // Validate required fields
-    if (!date || !time || !guests || !organizationId || !apiKey || !email) {
+    if (!date || !time || !guests || !organizationId || !apiKey || !phoneNumber) {
         return res.status(400).json({
-            error: 'Date, time, guests, organizationId, customerEmail are required.',
+            error: 'Missing required fields.',
         });
     }
 
@@ -152,40 +152,18 @@ router.post('/reservations/public', async (req, res) => {
             time,
             guests,
             notes,
+            phoneNumber,
             status: 'pending', // Default status
         });
 
         const io = req.app.get('io');
         const organizationRoom = `organization:${organizationId}`;
-
+        if(process.env.NODE_ENV === 'development') {
+            //TODO
+            console.log('TODO: hook up messaging here for transactional messaging between customers')
+        }
         // Emit real-time updates to the organization room
         io.to(organizationRoom).emit('reservation:created', reservation);
-
-        // Set up Nodemailer transporter for production
-        const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER, // SMTP username
-                pass: process.env.SMTP_PASS, // SMTP password
-            },
-        });
-
-        // Construct the pending reservation email
-        const mailOptions = {
-            from: '"My App" <noreply@myapp.com>', // Sender address
-            to: email, // Recipient email (the customer's email)
-            subject: 'Your Reservation is Pending',
-            text: `Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation. We will notify you once it has been confirmed.`,
-            html: `<p>Your reservation for ${guests} guests on ${date} at ${time} is pending confirmation.</p>
-                <p>We will notify you once it has been confirmed.</p>`,
-        };
-
-        // Send the email
-        if (process.env.NODE_ENV !== 'development') {
-            await transporter.sendMail(mailOptions);
-        }
 
         res.status(201).json(reservation);
     } catch (err) {

@@ -70,6 +70,16 @@ const Reservation = sequelize.define('Reservation', {
         defaultValue: 'pending',
         allowNull: false,
     },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,  // Mandatory field for phone number
+        validate: {
+            is: {
+                args: /^[0-9]{10}$/,  // Phone number must be 10 digits (you can adjust this pattern as needed)
+                msg: 'Phone number must be 10 digits.',
+            },
+        },
+    },
 }, {
     timestamps: true,
 });

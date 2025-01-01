@@ -172,7 +172,7 @@ const seedDatabase = async () => {
         });
         console.log('Availability seeded successfully!');
 
-        // Seed Reservations
+        // Seed Reservations (with phone number now mandatory)
         await Reservation.bulkCreate([
             {
                 organizationId: organization.id,
@@ -182,6 +182,7 @@ const seedDatabase = async () => {
                 guests: 4,
                 notes: 'First-time visitors',
                 status: 'confirmed',
+                phoneNumber: '2223334444', // Phone number included
             },
             {
                 organizationId: organization.id,
@@ -191,12 +192,12 @@ const seedDatabase = async () => {
                 guests: 2,
                 notes: 'Birthday celebration',
                 status: 'pending',
+                phoneNumber: '2223334444', // Phone number included
             },
         ]);
         console.log('Reservations seeded successfully!');
-        console.log('ORGANIZATION ID:', organization.id)
+        console.log('ORGANIZATION ID:', organization.id);
         console.log('APIKEY:', apiKey);
-
     } catch (err) {
         console.error('Error seeding data:', err);
         throw err;
