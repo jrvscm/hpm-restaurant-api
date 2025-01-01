@@ -23,6 +23,19 @@ const Reservation = sequelize.define('Reservation', {
             key: 'id',
         },
     },
+    contactName: {
+        type: DataTypes.STRING,
+        allowNull: false, // Making it a required field, can be adjusted to allow null
+        validate: {
+            notNull: {
+                msg: 'Contact name is required.',
+            },
+            len: {
+                args: [1, 255],
+                msg: 'Contact name must be between 1 and 255 characters.',
+            },
+        },
+    },
     date: {
         type: DataTypes.DATEONLY,
         allowNull: false,

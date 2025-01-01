@@ -37,10 +37,10 @@ router.get('/reservations', authenticate, authorize(['admin']), async (req, res)
  */
 router.post('/reservations', authenticate, async (req, res) => {
     // Extract relevant fields from the request body
-    const { date, time, guests, notes, phoneNumber } = req.body;
+    const { date, time, guests, notes, phoneNumber, contactName } = req.body;
 
     // Validate required fields
-    if (!date || !time || !guests, !phoneNumber) {
+    if (!date || !time || !guests, !phoneNumber, !contactName) {
         return res.status(400).json({
             error: 'Date, time, and guests are required.',
         });
@@ -56,6 +56,7 @@ router.post('/reservations', authenticate, async (req, res) => {
             guests,
             notes,
             phoneNumber,
+            contactName,
             status: 'pending',
         });
 
@@ -124,10 +125,10 @@ router.get('/reservations/user', authenticate, async (req, res) => {
  * Public-facing endpoint to create a reservation.
  */
 router.post('/reservations/public', async (req, res) => {
-    const { date, time, guests, notes, organizationId, apiKey, phoneNumber } = req.body;
+    const { date, time, guests, notes, organizationId, apiKey, phoneNumber, contactName } = req.body;
 
     // Validate required fields
-    if (!date || !time || !guests || !organizationId || !apiKey || !phoneNumber) {
+    if (!date || !time || !guests || !organizationId || !apiKey || !phoneNumber || !contactName) {
         return res.status(400).json({
             error: 'Missing required fields.',
         });
@@ -153,7 +154,8 @@ router.post('/reservations/public', async (req, res) => {
             guests,
             notes,
             phoneNumber,
-            status: 'pending', // Default status
+            contactName,
+            status: 'pending', 
         });
 
         const io = req.app.get('io');

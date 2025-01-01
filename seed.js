@@ -182,7 +182,8 @@ const seedDatabase = async () => {
                 guests: 4,
                 notes: 'First-time visitors',
                 status: 'confirmed',
-                phoneNumber: '2223334444', // Phone number included
+                phoneNumber: '2223334444',
+                contactName: 'jack'
             },
             {
                 organizationId: organization.id,
@@ -192,7 +193,8 @@ const seedDatabase = async () => {
                 guests: 2,
                 notes: 'Birthday celebration',
                 status: 'pending',
-                phoneNumber: '2223334444', // Phone number included
+                phoneNumber: '2223334444',
+                contactName: 'jack'
             },
         ]);
         console.log('Reservations seeded successfully!');
