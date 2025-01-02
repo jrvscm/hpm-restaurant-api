@@ -17,7 +17,10 @@ router.get('/reservations', authenticate, authorize(['admin']), async (req, res)
       }
   
       const reservations = await Reservation.findAll({
-        where: { organizationId },
+        where: {
+          organizationId,
+          archived: false, // Exclude archived reservations
+        },
         include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
         order: [
           ['date', 'ASC'], // Sort by date (most recent first)
@@ -30,7 +33,37 @@ router.get('/reservations', authenticate, authorize(['admin']), async (req, res)
       console.error(err);
       res.status(500).json({ error: 'Failed to retrieve reservations.' });
     }
-  });
+});
+
+/**
+ * Get all archived reservations for an organization (Admin only).
+ */
+router.get('/archived', authenticate, authorize(['admin']), async (req, res) => {
+    try {
+      const organizationId = req?.user?.organizationId;
+  
+      if (!organizationId) {
+        return res.status(400).json({ error: 'Organization ID is missing in session.' });
+      }
+  
+      const reservations = await Reservation.findAll({
+        where: {
+          organizationId,
+          archived: true,
+        },
+        include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
+        order: [
+          ['date', 'ASC'],
+          ['time', 'ASC']
+        ]
+      });
+  
+      res.status(200).json(reservations);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to retrieve archived reservations.' });
+    }
+});
  
 /**
  * Create a reservation (User).
@@ -82,9 +115,9 @@ router.put('/reservations/:id', authenticate, authorize(['admin']), async (req, 
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+    if (!['pending', 'confirmed', 'canceled'].includes(status)) {
         return res.status(400).json({
-            error: 'Status must be one of: pending, confirmed, or cancelled.',
+            error: 'Status must be one of: pending, confirmed, or canceled.',
         });
     }
 

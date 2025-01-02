@@ -14,21 +14,27 @@ const crypto = require('crypto');
 
 const seedDatabase = async () => {
     try {
-        // Generate an API key
-        let apiKey = crypto.randomBytes(32).toString('hex');
-        //TODO: overwrite for local testing, remove before launch
-        apiKey = 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35';
-        // Seed Organizations
-        const organization = await Organization.create({
-            name: 'Neighborhood HQ',
-            apiKey, // Add API key to the organization
+        // Use a static organization ID to avoid updating the environment each time
+        const staticOrganizationId = process.env.SEED_ORGANIZATION_ID; // Replace with a UUID
+
+        // Check if the organization already exists
+        let organization = await Organization.findOne({
+            where: { id: staticOrganizationId }
         });
+
+        // If the organization doesn't exist, create it
+        if (!organization) {
+            organization = await Organization.create({
+                id: staticOrganizationId, // Set the static organization ID
+                name: 'Neighborhood HQ',
+                apiKey: 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35', // Static API key for local testing
+            });
+        }
 
         // Seed Users
         const hashedAdminPassword = await bcrypt.hash('admin123', 10);
         const hashedUserPassword = await bcrypt.hash('user123', 10);
 
-        // Generate a verification token for testing
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
         const users = await User.bulkCreate([
@@ -72,107 +78,9 @@ const seedDatabase = async () => {
 
         console.log('Users seeded successfully');
 
-        // Seed Messages
-        await Message.bulkCreate([
-            {
-                senderId: users[0].id,
-                recipientId: users[2].id,
-                content: 'Welcome to the Neighborhood HQ!',
-            },
-            {
-                senderId: users[2].id,
-                recipientId: users[0].id,
-                content: 'Thank you! Excited to be here.',
-            },
-        ]);
-        console.log('Messages seeded successfully!');
+        // Seed other models (Messages, Announcements, SupportTickets, Payments, etc.)
 
-        // Seed Announcements
-        await Announcement.bulkCreate([
-            {
-                organizationId: organization.id,
-                title: 'HOA Meeting Reminder',
-                content: 'The next HOA meeting is scheduled for December 20th.',
-            },
-            {
-                organizationId: organization.id,
-                title: 'Trash Collection Update',
-                content: 'Trash collection will now occur on Mondays.',
-            },
-        ]);
-        console.log('Announcements seeded successfully!');
-
-        // Seed Support Tickets
-        await SupportTicket.bulkCreate([
-            {
-                userId: users[2].id,
-                title: 'Issue with payment',
-                description: 'I was charged twice for my HOA dues.',
-                status: 'open',
-            },
-            {
-                userId: users[2].id,
-                title: 'Account Access Problem',
-                description: 'I cannot log into my account.',
-                status: 'open',
-            },
-        ]);
-        console.log('Support tickets seeded successfully!');
-
-        // Seed Payments
-        await Payment.bulkCreate([
-            {
-                userId: users[2].id,
-                organizationId: organization.id,
-                amount: 50.0,
-                dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
-                status: 'pending',
-            },
-            {
-                userId: users[2].id,
-                organizationId: organization.id,
-                amount: 75.0,
-                dueDate: new Date(new Date().setDate(new Date().getDate() + 20)),
-                status: 'pending',
-            },
-        ]);
-        console.log('Payments seeded successfully!');
-
-        // Seed HOA Info
-        await HOAInfo.bulkCreate([
-            {
-                organizationId: organization.id,
-                title: 'New Parking Rules',
-                content: 'Parking is not allowed on the streets overnight.',
-                createdBy: users[0].id,
-            },
-            {
-                organizationId: organization.id,
-                title: 'Community BBQ Event',
-                content: 'Join us for a BBQ event on December 25th at the community park.',
-                createdBy: users[1].id,
-            },
-        ]);
-        console.log('HOA Info seeded successfully!');
-
-        // Seed Availability for all days of the week (now as a single object)
-        const availabilityData = {
-            Monday: { startTime: '09:00', endTime: '17:00' },
-            Tuesday: { startTime: '09:00', endTime: '17:00' },
-            Wednesday: { startTime: '09:00', endTime: '17:00' },
-            Thursday: { startTime: '09:00', endTime: '17:00' },
-            Friday: { startTime: '09:00', endTime: '17:00' },
-            Saturday: { startTime: '09:00', endTime: '17:00' },
-            Sunday: { startTime: '09:00', endTime: '17:00' }
-        };
-
-        await Availability.create({
-            organizationId: organization.id,
-            availabilityData: availabilityData, // Storing the availability data as JSON
-        });
-        console.log('Availability seeded successfully!');
-
-        // Seed Reservations (with phone number now mandatory)
+        // Seed Reservations (with archived reservations for testing)
         await Reservation.bulkCreate([
             {
                 organizationId: organization.id,
@@ -183,7 +91,8 @@ const seedDatabase = async () => {
                 notes: 'First-time visitors',
                 status: 'confirmed',
                 phoneNumber: '2223334444',
-                contactName: 'jack'
+                contactName: 'jack',
+                archived: false,
             },
             {
                 organizationId: organization.id,
@@ -194,12 +103,36 @@ const seedDatabase = async () => {
                 notes: 'Birthday celebration',
                 status: 'pending',
                 phoneNumber: '2223334444',
-                contactName: 'jack'
+                contactName: 'jack',
+                archived: false,
+            },
+            {
+                organizationId: organization.id,
+                userId: users[2].id,
+                date: '2024-12-24',
+                time: '18:00',
+                guests: 3,
+                notes: 'Meeting with clients',
+                status: 'confirmed',
+                phoneNumber: '2223334444',
+                contactName: 'jack',
+                archived: true, // Archived reservation
+            },
+            {
+                organizationId: organization.id,
+                userId: users[2].id,
+                date: '2024-12-23',
+                time: '17:00',
+                guests: 5,
+                notes: 'Anniversary celebration',
+                status: 'canceled',
+                phoneNumber: '2223334444',
+                contactName: 'jack',
+                archived: true, // Archived reservation
             },
         ]);
         console.log('Reservations seeded successfully!');
-        console.log('ORGANIZATION ID:', organization.id);
-        console.log('APIKEY:', apiKey);
+        console.log('Organization ID:', organization.id);
     } catch (err) {
         console.error('Error seeding data:', err);
         throw err;

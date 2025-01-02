@@ -79,7 +79,7 @@ const Reservation = sequelize.define('Reservation', {
         allowNull: true,
     },
     status: {
-        type: DataTypes.ENUM('pending', 'confirmed', 'cancelled'),
+        type: DataTypes.ENUM('pending', 'confirmed', 'canceled'),
         defaultValue: 'pending',
         allowNull: false,
     },
@@ -92,6 +92,10 @@ const Reservation = sequelize.define('Reservation', {
                 msg: 'Phone number must be 10 digits.',
             },
         },
+    },
+    archived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false, 
     },
 }, {
     timestamps: true,

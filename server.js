@@ -9,7 +9,6 @@ const childProcess = require('child_process'); // For managing PostgreSQL proces
 const seedDatabase = require('./seed'); // Database seeding function
 const { Server } = require('socket.io'); // Socket.IO for real-time updates
 const http = require('http'); // For creating the HTTP server
-
 // Import routes
 const protectedRoutes = require('./src/routes/protected');
 const announcementRoutes = require('./src/routes/announcement');
@@ -22,6 +21,8 @@ const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
 const reservationRoutes = require('./src/routes/reservation');
 const availabilityRoutes = require('./src/routes/availability');
+
+require('./src/jobs');
 
 // Initialize dotenv for environment configuration
 dotenv.config();
