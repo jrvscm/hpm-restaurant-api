@@ -52,7 +52,7 @@ const server = http.createServer(app); // Create HTTP server for Socket.IO
 // Initialize Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : ''], // Replace with your frontend URL in production
+        origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pizzalander.netlify.app'], // Replace with your frontend URL in production
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true, 
     },
@@ -87,7 +87,7 @@ app.use(limiter);
 
 // CORS Configuration
 const corsOptions = {
-    origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : ''], // TODO: Replace with your frontend's URL once integration!!!
+    origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pizzalander.netlify.app'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'], 
     allowedHeaders: ['Content-Type', 'Authorization', 'apiKey', 'credentials', 'organizationId'],
     credentials: true,
