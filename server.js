@@ -52,7 +52,7 @@ const server = http.createServer(app); // Create HTTP server for Socket.IO
 // Initialize Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000'], // Replace with your frontend URL in production
+        origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : ''], // Replace with your frontend URL in production
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true, 
     },
@@ -87,7 +87,7 @@ app.use(limiter);
 
 // CORS Configuration
 const corsOptions = {
-    origin: ['http://localhost:3000'], // TODO: Replace with your frontend's URL once integration!!!
+    origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : ''], // TODO: Replace with your frontend's URL once integration!!!
     methods: ['GET', 'POST', 'PUT', 'DELETE'], 
     allowedHeaders: ['Content-Type', 'Authorization', 'apiKey', 'credentials', 'organizationId'],
     credentials: true,
@@ -111,19 +111,21 @@ app.use('/reservation', reservationRoutes);
 app.use('/availability', availabilityRoutes);
 
 // Sync database and seed data
-(async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Database connected successfully!');
-        await sequelize.sync({ force: true }); // Sync and drop existing tables
-        console.log('Database synced successfully!');
-        await seedDatabase(); // Seed the database
-        console.log('Database seeded successfully!');
-    } catch (err) {
-        console.error('Failed to initialize database:', err);
-        process.exit(1); // Exit if there is an error
-    }
-})();
+if(process.env.NODE_ENV === 'development') {
+    (async () => {
+        try {
+            await sequelize.authenticate();
+            console.log('Database connected successfully!');
+            await sequelize.sync({ force: true }); // Sync and drop existing tables
+            console.log('Database synced successfully!');
+            await seedDatabase(); // Seed the database
+            console.log('Database seeded successfully!');
+        } catch (err) {
+            console.error('Failed to initialize database:', err);
+            process.exit(1); // Exit if there is an error
+        }
+    })();
+}
 
 // Start the server
 const PORT = process.env.PORT || 5001;

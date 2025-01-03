@@ -207,5 +207,28 @@ router.post('/reservations/public', async (req, res) => {
     }
 });
 
+/**
+ * Archive a reservation (Admin only).
+ */
+router.put('/reservations/:id/archive', authenticate, authorize(['admin']), async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const reservation = await Reservation.findByPk(id);
+
+        if (!reservation || reservation.organizationId !== req.user.organizationId) {
+            return res.status(404).json({ error: 'Reservation not found.' });
+        }
+
+        reservation.archived = true;
+        await reservation.save();
+
+        res.status(200).json(reservation);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to archive reservation.' });
+    }
+});
+
 
 module.exports = router;

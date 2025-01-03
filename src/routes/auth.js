@@ -70,10 +70,10 @@ router.post('/register/organization', async (req, res) => {
         const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
-                user: process.env.SMTP_USER, // SMTP username
-                pass: process.env.SMTP_PASS, // SMTP password
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS, 
             },
         });
 
@@ -102,7 +102,7 @@ router.post('/register/organization', async (req, res) => {
             organization: {
                 id: organization.id,
                 name: organization.name,
-                apiKey, // Include API key in the response
+                apiKey, 
             },
             user: {
                 id: admin.id,
@@ -286,13 +286,13 @@ router.post('/resend-verification', async (req, res) => {
         await user.save();
 
         // Set up Nodemailer transporter
-        const transporter = nodemailer.createTransport({
+        const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
-                user: process.env.SMTP_USER, // SMTP username
-                pass: process.env.SMTP_PASS, // SMTP password
+                user: process.env.SMTP_USER, 
+                pass: process.env.SMTP_PASS, 
             },
         });
 
