@@ -53,7 +53,8 @@ const io = new Server(server, {
         origin: [process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pizzalander.netlify.app'], // Replace with your frontend URL in production
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true, 
-    }
+    },
+    path: '/socket.io', 
 });
 
 // Attach Socket.IO to app for access in routes
