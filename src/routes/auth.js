@@ -56,17 +56,16 @@ router.post('/register/organization', async (req, res) => {
         });
 
         // Generate a JWT token for the new admin
-        const token = generateToken(admin);
+        const updatedToken = generateToken(admin);
 
-        // Optionally set the token as a cookie (if server-side sessions are used)
-        res.cookie('token', token, {
+        res.cookie('token', updatedToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none', //currently served on different domains
-            domain: '.pizzalander.netlify.app',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            sameSite: 'none', // For cross-domain cookies
+            ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+            maxAge: 60 * 60 * 1000, // 1 hour
             path: '/',
-        });
+          });          
 
         // Set up Nodemailer transporter for production
         const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
@@ -211,15 +210,14 @@ router.post('/login', async (req, res) => {
 
         const token = generateToken(user);
 
-        // Set the token as a cookie
         res.cookie('token', token, {
-            httpOnly: true, // Secure against XSS attacks
-            secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-            sameSite: 'none', //currently served on different domains
-            domain: '.pizzalander.netlify.app',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none', // For cross-domain cookies
+            ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+            maxAge: 60 * 60 * 1000, // 1 hour
             path: '/',
-        });
+        }); 
 
         // Send the response with additional user details if needed
         res.status(200).json({ 
@@ -260,11 +258,11 @@ router.get('/verify/:token', async (req, res) => {
       res.cookie('token', updatedToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none', //currently served on different domains
-        domain: '.pizzalander.netlify.app',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+        sameSite: 'none', // For cross-domain cookies
+        ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+        maxAge: 60 * 60 * 1000, // 1 hour
         path: '/',
-      });
+      }); 
   
         res.redirect(`${process.env.FRONTEND_URL}/verification?success=1`);
     } catch (err) {
