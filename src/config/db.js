@@ -1,5 +1,5 @@
-require('dotenv').config();
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
 let sequelize;
 
@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'development') {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT || 5432,
         dialect: 'postgres',
-        logging: console.log, 
+        logging: console.log,
     });
 } else {
     sequelize = new Sequelize(process.env.DATABASE_URL, {
@@ -19,14 +19,15 @@ if (process.env.NODE_ENV === 'development') {
         dialectOptions: {
             ssl: {
                 require: true,
-                rejectUnauthorized: false, 
+                rejectUnauthorized: false, // Skip certificate validation
             },
         },
-        logging: console.log, 
+        logging: console.log,
     });
 }
 
-sequelize.authenticate()
+sequelize
+    .authenticate()
     .then(() => console.log('Database connected successfully!'))
     .catch((err) => console.error('Database connection failed:', err));
 
