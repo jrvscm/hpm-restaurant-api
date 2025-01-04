@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'development') {
         logging: console.log,
     });
 } else {
-    sequelize = new Sequelize(process.env.DATABASE_URL, {
+    sequelize = new Sequelize(`${process.env.DATABASE_URL}?sslmode=require`, {
         dialect: 'postgres',
         dialectOptions: {
             ssl: {
