@@ -54,6 +54,7 @@ const io = new Server(server, {
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true, 
     },
+    path: '/backend/socket.io'
 });
 
 // Attach Socket.IO to app for access in routes
