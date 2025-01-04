@@ -44,6 +44,9 @@ if (process.env.NODE_ENV === 'development') {
 const app = express();
 const server = http.createServer(app); // Create HTTP server for Socket.IO
 
+// Trust Heroku's proxy
+app.set('trust proxy', 1);
+
 // Initialize Socket.IO
 const io = new Server(server, {
     cors: {
@@ -77,7 +80,9 @@ const limiter = rateLimit({
     message: {
         error: 'Too many requests from this IP, please try again after 15 minutes.',
     },
+    keyGenerator: (req) => req.ip,
 });
+
 app.use(limiter);
 
 // CORS Configuration

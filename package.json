@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "seedDev": "NODE_ENV=development NODE_TLS_REJECT_UNAUTHORIZED=0 node seed.js",
-    "seedProd":  "NODE_ENV=production NODE_TLS_REJECT_UNAUTHORIZED=0 node seed.js"
+    "seedProd": "NODE_ENV=production NODE_TLS_REJECT_UNAUTHORIZED=0 node seed.js"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "express-rate-limit": "^7.4.1",
+    "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",

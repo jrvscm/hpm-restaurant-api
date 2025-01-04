@@ -4,7 +4,7 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'Neighborhood HQ API Documentation',
+            title: 'Restaurant Saas API',
             version: '1.0.0',
             description: 'API documentation for the Neighborhood HQ application.',
         },
