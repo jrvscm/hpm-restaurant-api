@@ -22,6 +22,7 @@
  *               - email
  *               - password
  *               - fullName
+ *               - phone
  *             properties:
  *               organizationName:
  *                 type: string
@@ -35,6 +36,9 @@
  *               fullName:
  *                 type: string
  *                 example: John Doe
+ *               phone:
+ *                 type: string
+ *                 example: "+1234567890"
  *     responses:
  *       201:
  *         description: Organization and admin registered successfully. Verification email sent.
@@ -46,49 +50,30 @@
  *                 message:
  *                   type: string
  *                   example: Organization and admin registered successfully. Verification email sent!
- *                 token:
- *                   type: string
- *                   description: JWT token for the admin user.
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 organization:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     apiKey:
+ *                       type: string
  *                 user:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: string
- *                       description: Admin user ID.
- *                       example: 123e4567-e89b-12d3-a456-426614174000
  *                     email:
  *                       type: string
- *                       description: Admin user email.
- *                       example: admin@example.com
  *                     role:
  *                       type: string
- *                       description: User role.
- *                       example: admin
  *                     organizationId:
  *                       type: string
- *                       description: ID of the registered organization.
- *                       example: 987e6543-e21d-12d3-a456-426614174001
  *       400:
  *         description: Validation error or organization name already in use.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Organization name already in use.
  *       500:
  *         description: Server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Failed to register organization and admin.
  */
 
 /**
@@ -193,14 +178,14 @@
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 message:
  *                   type: string
  *                 role:
  *                   type: string
- *                   example: user
+ *                   example: admin
  *                 organizationId:
  *                   type: string
- *                   example: 123e4567-e89b-12d3-a456-426614174000
+ *                   example: org123
  *       404:
  *         description: User not found.
  *       401:
@@ -366,4 +351,3 @@
  *         description: User not found.
  *       500:
  *         description: Server error.
- */
