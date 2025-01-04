@@ -62,8 +62,9 @@ router.post('/register/organization', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 1000, // 1 hour
+            sameSite: 'none', //currently served on different domains
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            path: '/',
         });
 
         // Set up Nodemailer transporter for production
@@ -214,7 +215,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true, // Secure against XSS attacks
             secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-            sameSite: 'strict', // Prevent CSRF attacks
+            sameSite: 'none', //currently served on different domains
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
             path: '/',
         });
@@ -254,8 +255,9 @@ router.get('/verify/:token', async (req, res) => {
       res.cookie('token', updatedToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 1000,
+        sameSite: 'none', //currently served on different domains
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+        path: '/',
       });
   
         res.redirect(`${process.env.FRONTEND_URL}/verification?success=1`);
