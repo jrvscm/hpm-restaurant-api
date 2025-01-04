@@ -61,7 +61,7 @@ router.post('/register/organization', async (req, res) => {
         res.cookie('token', updatedToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none', // For cross-domain cookies
+            sameSite: 'lax', // For cross-domain cookies
             ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
             maxAge: 60 * 60 * 1000, // 1 hour
             path: '/',
@@ -213,7 +213,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none', // For cross-domain cookies
+            sameSite: 'lax', // For cross-domain cookies
             ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
             maxAge: 60 * 60 * 1000, // 1 hour
             path: '/',
@@ -258,7 +258,7 @@ router.get('/verify/:token', async (req, res) => {
       res.cookie('token', updatedToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none', // For cross-domain cookies
+        sameSite: 'lax', // For cross-domain cookies
         ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/',
