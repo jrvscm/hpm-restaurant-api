@@ -7,14 +7,13 @@ const swaggerSpecs = require('./src/config/swagger'); // Swagger configuration
 const childProcess = require('child_process'); // For managing PostgreSQL process
 const { Server } = require('socket.io'); // Socket.IO for real-time updates
 const http = require('http'); // For creating the HTTP server
+
 // Import routes
-const protectedRoutes = require('./src/routes/protected');
 const announcementRoutes = require('./src/routes/announcement');
 const authRoutes = require('./src/routes/auth');
 const userManagementRoutes = require('./src/routes/userManagement');
 const messageRoutes = require('./src/routes/messages');
 const paymentRoutes = require('./src/routes/payment');
-const hoaInfoRoutes = require('./src/routes/hoaInfo');
 const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
 const reservationRoutes = require('./src/routes/reservation');
@@ -100,12 +99,10 @@ app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Register routes
 app.use('/auth', authRoutes);
-app.use('/protected', protectedRoutes);
 app.use('/announcements', announcementRoutes);
 app.use('/users', userManagementRoutes);
 app.use('/messages', messageRoutes);
 app.use('/payments', paymentRoutes);
-app.use('/info', hoaInfoRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/support', supportRoutes);
 app.use('/reservation', reservationRoutes);
