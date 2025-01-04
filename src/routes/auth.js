@@ -63,6 +63,7 @@ router.post('/register/organization', async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'none', //currently served on different domains
+            domain: '.pizzalander.netlify.app',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
             path: '/',
         });
@@ -99,7 +100,6 @@ router.post('/register/organization', async (req, res) => {
 
         res.status(201).json({
             message: 'Organization and admin registered successfully. Verification email sent!',
-            token,
             organization: {
                 id: organization.id,
                 name: organization.name,
@@ -216,12 +216,17 @@ router.post('/login', async (req, res) => {
             httpOnly: true, // Secure against XSS attacks
             secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
             sameSite: 'none', //currently served on different domains
+            domain: '.pizzalander.netlify.app',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
             path: '/',
         });
 
         // Send the response with additional user details if needed
-        res.status(200).json({ message: 'Login successful', role: user.role, organizationId: user.organizationId });
+        res.status(200).json({ 
+            message: 'Login successful', 
+            role: user.role, 
+            organizationId: user.organizationId 
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to log in user.' });
@@ -256,6 +261,7 @@ router.get('/verify/:token', async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none', //currently served on different domains
+        domain: '.pizzalander.netlify.app',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
         path: '/',
       });

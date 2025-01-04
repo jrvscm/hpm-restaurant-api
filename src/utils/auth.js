@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const generateToken = (user) => {
     const options = {};
     if (process.env.JWT_EXPIRATION !== 'never') {
-        options.expiresIn = process.env.JWT_EXPIRATION || '1h'; // Default to 1 hour
+        options.expiresIn = process.env.JWT_EXPIRATION || '1h'; 
     }
 
     return jwt.sign(
