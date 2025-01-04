@@ -4,7 +4,6 @@ const Message = require('./Message');
 const Announcement = require('./Announcement');
 const SupportTicket = require('./SupportTicket');
 const Payment = require('./Payment');
-const HOAInfo = require('./HOAInfo');
 const Availability = require('./Availability');
 const Reservation = require('./Reservation');
 
@@ -14,9 +13,6 @@ User.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' 
 
 Organization.hasMany(Announcement, { foreignKey: 'organizationId', as: 'announcements' });
 Announcement.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
-
-Organization.hasMany(HOAInfo, { foreignKey: 'organizationId', as: 'hoaInfo' });
-HOAInfo.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
 
 User.hasMany(Message, { foreignKey: 'senderId', as: 'sentMessages' });
 User.hasMany(Message, { foreignKey: 'recipientId', as: 'receivedMessages' });
@@ -46,7 +42,6 @@ module.exports = {
     Announcement,
     SupportTicket,
     Payment,
-    HOAInfo,
     Availability,
     Reservation
 };
