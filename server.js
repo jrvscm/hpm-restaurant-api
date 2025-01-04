@@ -4,9 +4,7 @@ const rateLimit = require('express-rate-limit'); // Import rate limiter
 const dotenv = require('dotenv'); // Import dotenv for environment variables
 const swaggerUi = require('swagger-ui-express'); // Swagger for API documentation
 const swaggerSpecs = require('./src/config/swagger'); // Swagger configuration
-const sequelize = require('./src/config/db'); // Sequelize database connection
 const childProcess = require('child_process'); // For managing PostgreSQL process
-const seedDatabase = require('./seed'); // Database seeding function
 const { Server } = require('socket.io'); // Socket.IO for real-time updates
 const http = require('http'); // For creating the HTTP server
 // Import routes
@@ -24,10 +22,8 @@ const availabilityRoutes = require('./src/routes/availability');
 
 require('./src/jobs');
 
-// Initialize dotenv for environment configuration
 dotenv.config();
 
-// Conditionally check and start PostgreSQL in development
 if (process.env.NODE_ENV === 'development') {
     try {
         // Check if PostgreSQL is running
@@ -35,12 +31,11 @@ if (process.env.NODE_ENV === 'development') {
         console.log('PostgreSQL is already running.');
     } catch {
         try {
-            // Start PostgreSQL if not running
             childProcess.execSync('pg_ctl -D /usr/local/var/postgresql@14 start', { stdio: 'ignore' });
             console.log('Starting PostgreSQL...');
         } catch (err) {
             console.error('Failed to start PostgreSQL:', err.message);
-            process.exit(1); // Exit the app if PostgreSQL cannot start
+            process.exit(1); 
         }
     }
 }
@@ -109,23 +104,6 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/support', supportRoutes);
 app.use('/reservation', reservationRoutes);
 app.use('/availability', availabilityRoutes);
-
-// Sync database and seed data
-if(process.env.NODE_ENV === 'development') {
-    (async () => {
-        try {
-            await sequelize.authenticate();
-            console.log('Database connected successfully!');
-            await sequelize.sync({ force: true }); // Sync and drop existing tables
-            console.log('Database synced successfully!');
-            await seedDatabase(); // Seed the database
-            console.log('Database seeded successfully!');
-        } catch (err) {
-            console.error('Failed to initialize database:', err);
-            process.exit(1); // Exit if there is an error
-        }
-    })();
-}
 
 // Start the server
 const PORT = process.env.PORT || 5001;

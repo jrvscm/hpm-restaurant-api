@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "seedDev": "NODE_ENV=development NODE_TLS_REJECT_UNAUTHORIZED=0 node seed.js",
+    "seedProd":  "NODE_ENV=production NODE_TLS_REJECT_UNAUTHORIZED=0 node seed.js"
   },
   "keywords": [],
   "author": "",

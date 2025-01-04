@@ -1,33 +1,31 @@
 const {
     User,
-    Message,
-    Announcement,
-    SupportTicket,
-    Payment,
-    HOAInfo,
     Organization,
-    Availability,
     Reservation,
 } = require('./src/models');
+require('dotenv').config(); 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const sequelize = require('./src/config/db');
 
 const seedDatabase = async () => {
     try {
-        // Use a static organization ID to avoid updating the environment each time
+        console.log('Starting database seeding...');
+        await sequelize.sync({ force: true }); // Recreate tables
+        console.log('Database synced successfully!');
+
         const staticOrganizationId = process.env.SEED_ORGANIZATION_ID; // Replace with a UUID
 
         // Check if the organization already exists
         let organization = await Organization.findOne({
-            where: { id: staticOrganizationId }
+            where: { id: staticOrganizationId },
         });
 
-        // If the organization doesn't exist, create it
         if (!organization) {
             organization = await Organization.create({
-                id: staticOrganizationId, // Set the static organization ID
-                name: 'Neighborhood HQ',
-                apiKey: 'cef28041fc38b29016053080a46cc28b1fa8ae3b25c0eb67762fa2ec5c3fda35', // Static API key for local testing
+                id: staticOrganizationId,
+                name: 'Restaurant Saas Api',
+                apiKey: process.env.SEED_API_KEY,
             });
         }
 
@@ -77,8 +75,6 @@ const seedDatabase = async () => {
         ]);
 
         console.log('Users seeded successfully');
-
-        // Seed other models (Messages, Announcements, SupportTickets, Payments, etc.)
 
         // Seed Reservations (with archived reservations for testing)
         await Reservation.bulkCreate([
@@ -131,6 +127,7 @@ const seedDatabase = async () => {
                 archived: true, // Archived reservation
             },
         ]);
+
         console.log('Reservations seeded successfully!');
         console.log('Organization ID:', organization.id);
     } catch (err) {
@@ -139,4 +136,14 @@ const seedDatabase = async () => {
     }
 };
 
-module.exports = seedDatabase;
+// Call the seed function when executing the script
+(async () => {
+    try {
+        await seedDatabase();
+        console.log('Seeding completed successfully!');
+        process.exit(0); // Exit the process when seeding is done
+    } catch (error) {
+        console.error('Seeding failed:', error);
+        process.exit(1); // Exit with error status
+    }
+})();
