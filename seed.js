@@ -2,8 +2,10 @@ const {
     User,
     Organization,
     Reservation,
-} = require('./src/models');
-require('dotenv').config(); 
+    UserPoints,
+    Payment,
+} = require('./src/models'); // Import the models
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const sequelize = require('./src/config/db');
@@ -14,7 +16,7 @@ const seedDatabase = async () => {
         await sequelize.sync({ force: true }); // Recreate tables
         console.log('Database synced successfully!');
 
-        const staticOrganizationId = process.env.SEED_ORGANIZATION_ID; // Replace with a UUID
+        const staticOrganizationId = process.env.SEED_ORGANIZATION_ID;
 
         // Check if the organization already exists
         let organization = await Organization.findOne({
@@ -47,6 +49,7 @@ const seedDatabase = async () => {
                 phone: '3334445555',
                 resetToken: null,
                 resetTokenExpiry: null,
+                rewardsNumber: '100001', // Add rewards number
             },
             {
                 fullName: 'Unverified Admin',
@@ -59,6 +62,7 @@ const seedDatabase = async () => {
                 phone: '3334445555',
                 resetToken: null,
                 resetTokenExpiry: null,
+                rewardsNumber: '100002', // Add rewards number
             },
             {
                 fullName: 'Regular User',
@@ -71,10 +75,21 @@ const seedDatabase = async () => {
                 phone: '2223334444',
                 resetToken: null,
                 resetTokenExpiry: null,
+                rewardsNumber: '100003', // Add rewards number
             },
         ]);
 
         console.log('Users seeded successfully');
+
+        // Seed Loyalty Points for "Regular User"
+        const regularUser = users.find(user => user.email === 'user@example.com');
+        await UserPoints.create({
+            organizationId: organization.id,
+            userId: regularUser.id,
+            totalPoints: 100,
+        });
+
+        console.log('Loyalty points seeded successfully!');
 
         // Seed Reservations (with archived reservations for testing)
         await Reservation.bulkCreate([
@@ -90,45 +105,21 @@ const seedDatabase = async () => {
                 contactName: 'jack',
                 archived: false,
             },
-            {
-                organizationId: organization.id,
-                userId: users[2].id,
-                date: '2024-12-27',
-                time: '13:00',
-                guests: 2,
-                notes: 'Birthday celebration',
-                status: 'pending',
-                phoneNumber: '2223334444',
-                contactName: 'jack',
-                archived: false,
-            },
-            {
-                organizationId: organization.id,
-                userId: users[2].id,
-                date: '2024-12-24',
-                time: '18:00',
-                guests: 3,
-                notes: 'Meeting with clients',
-                status: 'confirmed',
-                phoneNumber: '2223334444',
-                contactName: 'jack',
-                archived: true, // Archived reservation
-            },
-            {
-                organizationId: organization.id,
-                userId: users[2].id,
-                date: '2024-12-23',
-                time: '17:00',
-                guests: 5,
-                notes: 'Anniversary celebration',
-                status: 'canceled',
-                phoneNumber: '2223334444',
-                contactName: 'jack',
-                archived: true, // Archived reservation
-            },
         ]);
 
         console.log('Reservations seeded successfully!');
+
+        // Seed Test Payment
+        await Payment.create({
+            userId: regularUser.id,
+            organizationId: organization.id, // Link to the organization
+            amount: 5000, // $50.00
+            paymentIntentId: 'pi_test_123456',
+            pointsEarned: 50,
+            dueDate: new Date(), // Add a valid date
+        });
+
+        console.log('Test payment seeded successfully!');
         console.log('Organization ID:', organization.id);
     } catch (err) {
         console.error('Error seeding data:', err);

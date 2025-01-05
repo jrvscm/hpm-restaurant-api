@@ -6,6 +6,9 @@ const SupportTicket = require('./SupportTicket');
 const Payment = require('./Payment');
 const Availability = require('./Availability');
 const Reservation = require('./Reservation');
+const LoyaltySettings = require('./LoyaltySettings');
+const UserPoints = require('./UserPoints');
+const PointsHistory = require('./PointsHistory');
 
 // Define associations
 Organization.hasMany(User, { foreignKey: 'organizationId', as: 'users' });
@@ -34,6 +37,11 @@ Availability.belongsTo(Organization, { foreignKey: 'organizationId' });
 Reservation.belongsTo(Organization, { foreignKey: 'organizationId' });
 Reservation.belongsTo(User, { foreignKey: 'userId' });
 
+LoyaltySettings.belongsTo(Organization, { foreignKey: 'organizationId' });
+UserPoints.belongsTo(User, { foreignKey: 'userId' });
+UserPoints.belongsTo(Organization, { foreignKey: 'organizationId' });
+PointsHistory.belongsTo(User, { foreignKey: 'userId' });
+
 // Export all models
 module.exports = {
     User,
@@ -43,5 +51,8 @@ module.exports = {
     SupportTicket,
     Payment,
     Availability,
-    Reservation
+    Reservation,
+    LoyaltySettings,
+    UserPoints,
+    PointsHistory
 };

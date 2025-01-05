@@ -73,6 +73,11 @@ const User = sequelize.define(
                 key: 'id',
             },
         },
+        rewardsNumber: {
+            type: DataTypes.STRING,
+            unique: true,
+            allowNull: false,
+        },
     },
     {
         tableName: 'Users',

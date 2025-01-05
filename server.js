@@ -18,6 +18,8 @@ const dashboardRoutes = require('./src/routes/dashboard');
 const supportRoutes = require('./src/routes/support');
 const reservationRoutes = require('./src/routes/reservation');
 const availabilityRoutes = require('./src/routes/availability');
+const webhooks = require('./src/routes/webhooks');
+const loyalty = require('./src/routes/loyalty');
 
 require('./src/jobs');
 
@@ -70,8 +72,17 @@ io.on('connection', (socket) => {
     }
 });
 
-// Middleware to parse JSON requests
-app.use(express.json());
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+app.use(
+    express.json({
+      verify: (req, res, buf) => {
+        if (req.originalUrl.startsWith('/webhooks/stripe')) {
+          req.rawBody = buf.toString(); // Preserve raw body for Stripe
+        }
+      },
+    })
+  );
 
 // Configure rate limiter
 const limiter = rateLimit({
@@ -107,6 +118,8 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/support', supportRoutes);
 app.use('/reservation', reservationRoutes);
 app.use('/availability', availabilityRoutes);
+app.use('/loyalty', loyalty);
+app.use('/webhooks', webhooks);
 
 // Start the server
 const PORT = process.env.PORT || 5001;
