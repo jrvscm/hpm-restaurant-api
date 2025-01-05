@@ -1,5 +1,5 @@
 ## JWT auth routes
-## Authentication managed with token cookies
+## Authentication managed with JWT token cookie
 ## Multi Tenant achritecture with 'admin' and 'user' roles
 ## Reservation System for restaurants
 ## Api Key generation for restaurant clients to access public routes
