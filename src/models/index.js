@@ -26,14 +26,11 @@ Message.belongsTo(User, { foreignKey: 'recipientId', as: 'messageRecipient' });
 User.hasMany(SupportTicket, { foreignKey: 'userId', as: 'supportTickets' });
 User.hasMany(Payment, { foreignKey: 'userId', as: 'payments' });
 
-// Organization associations
 Organization.hasMany(Availability, { foreignKey: 'organizationId' });
 Organization.hasMany(Reservation, { foreignKey: 'organizationId' });
 
-// Availability associations
 Availability.belongsTo(Organization, { foreignKey: 'organizationId' });
 
-// Reservation associations
 Reservation.belongsTo(Organization, { foreignKey: 'organizationId' });
 Reservation.belongsTo(User, { foreignKey: 'userId' });
 

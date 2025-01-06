@@ -18,8 +18,8 @@ const Payment = sequelize.define(
             },
         },
         organizationId: {
-            type: DataTypes.UUID, // Add organizationId
-            allowNull: false, // Adjust as needed
+            type: DataTypes.UUID,
+            allowNull: false,
             references: {
                 model: 'Organizations',
                 key: 'id',
@@ -29,13 +29,13 @@ const Payment = sequelize.define(
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
-        dueDate: {
-            type: DataTypes.DATE,
+        paymentIntentId: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
-        status: {
-            type: DataTypes.ENUM('pending', 'paid', 'overdue'),
-            defaultValue: 'pending',
+        pointsEarned: {
+            type: DataTypes.INTEGER,
+            allowNull: true, // Optional, depending on logic
         },
     },
     {

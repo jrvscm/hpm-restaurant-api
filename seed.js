@@ -116,7 +116,6 @@ const seedDatabase = async () => {
             amount: 5000, // $50.00
             paymentIntentId: 'pi_test_123456',
             pointsEarned: 50,
-            dueDate: new Date(), // Add a valid date
         });
 
         console.log('Test payment seeded successfully!');

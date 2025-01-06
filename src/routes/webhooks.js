@@ -1,5 +1,5 @@
 const express = require('express');
-const { UserPoints, Payment, User } = require('../models');
+const { UserPoints, Payment, User, PointsHistory } = require('../models');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 
@@ -54,7 +54,8 @@ async function handleRewardsLogic(rewardsNumber, amount, paymentIntentId) {
         throw new Error(`User with rewards number ${rewardsNumber} not found.`);
     }
 
-    const pointsEarned = Math.floor(amount / 100); 
+    const poinstPerDollar = .1;
+    const pointsEarned = Math.floor((amount / 100) * poinstPerDollar); 
     console.log(`Adding ${pointsEarned} points to user ${user.id}`);
 
     // Update the user's points
@@ -66,11 +67,12 @@ async function handleRewardsLogic(rewardsNumber, amount, paymentIntentId) {
     loyaltyRecord.totalPoints += pointsEarned;
     await loyaltyRecord.save();
 
+    // Record the payment
     await Payment.create({
         userId: user.id,
-        amount: amount / 100,
+        organizationId: loyaltyRecord.organizationId, // Assuming loyalty record holds org info
+        amount: amount / 100, // Convert to dollars
         paymentIntentId,
-        pointsEarned,
     });
 
     // Add an entry to PointsHistory
@@ -83,4 +85,5 @@ async function handleRewardsLogic(rewardsNumber, amount, paymentIntentId) {
 
     console.log(`Successfully added ${pointsEarned} points for user ${user.id}`);
 }
+
 module.exports = router;

@@ -257,7 +257,7 @@
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [pending, confirmed, cancelled]
+ *                 enum: [pending, confirmed, canceled]
  *                 example: confirmed
  *     responses:
  *       200:
