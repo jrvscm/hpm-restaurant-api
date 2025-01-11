@@ -46,8 +46,8 @@ const User = sequelize.define(
             allowNull: false,
         },
         role: {
-            type: DataTypes.ENUM('admin', 'pending_admin', 'user'),
-            defaultValue: 'user',
+            type: DataTypes.ENUM('admin', 'user', 'rewards_user'),
+            defaultValue: 'rewards_user',
         },
         status: {
             type: DataTypes.ENUM('pending', 'verified', 'invited'),

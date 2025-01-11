@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { User, Organization } = require('../models');
+const { User, Organization, UserPoints } = require('../models');
 const { generateToken } = require('../utils/auth');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
@@ -171,7 +171,7 @@ router.post('/invite', authenticate, authorize(['admin']), async (req, res) => {
         const verificationToken = crypto.randomBytes(32).toString('hex');
         await User.create({
             email,
-            role: role === 'admin' ? 'pending_admin' : 'user',
+            role: role === 'admin' ? 'admin' : 'user',
             status: 'invited',
             organizationId: adminUser.organizationId,
             verificationToken,
@@ -403,6 +403,178 @@ router.get('/profile', authenticate, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to retrieve profile.' });
+    }
+});
+
+/**
+ * Register a new user for the rewards program.
+ */
+router.post('/rewards/register', async (req, res) => {
+    const { email, password, phone, fullName } = req.body;
+    const { apikey: apiKey } = req.headers;
+
+    if (!email || !password || !apiKey) {
+        return res.status(400).json({ error: 'Email, password, and API key are required.' });
+    }
+
+    try {
+        // Find the organization by API key
+        const organization = await Organization.findOne({ where: { apiKey } });
+
+        if (!organization) {
+            return res.status(401).json({ error: 'Invalid API key.' });
+        }
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ where: { email, organizationId: organization.id } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Invalid registration credentials.' });
+        }
+
+        // Generate the rewards ID (e.g., "R10003")
+        const rewardsId = `R${Math.floor(10000 + Math.random() * 90000)}`;
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Generate a verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Create the new rewards user with status as pending
+        const newUser = await User.create({
+            email,
+            fullName,
+            phone,
+            password: hashedPassword,
+            rewardsNumber: rewardsId,
+            organizationId: organization.id,
+            role: 'rewards_user',
+            status: 'pending',
+            verificationToken,
+        });
+
+        // Create a UserPoints record for the new user
+        await UserPoints.create({
+            userId: newUser.id,
+            organizationId: organization.id,
+            totalPoints: 0, // Initialize with 0 points
+        });
+
+        // Generate a JWT token for the newly created user
+        const token = generateToken(newUser);
+
+        // Set the token as a cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax', // For cross-domain cookies
+            ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+            maxAge: 60 * 60 * 1000, // 1 hour
+            path: '/',
+        });
+
+        // Send verification email
+        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Verification link: ${verificationUrl}`);
+        } else {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                secure: process.env.SMTP_SECURE === 'true',
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS,
+                },
+            });
+
+            const mailOptions = {
+                from: '"Rewards Program" <noreply@rewards.com>',
+                to: email,
+                subject: 'Verify Your Account',
+                text: `Welcome to our rewards program! Please verify your account by clicking the link: ${verificationUrl}`,
+                html: `<p>Welcome to our rewards program!</p>
+                    <p>Click the link below to verify your account:</p>
+                    <a href="${verificationUrl}">${verificationUrl}</a>`,
+            };
+
+            await transporter.sendMail(mailOptions);
+        }
+
+        res.status(201).json({
+            message: 'Rewards user registered successfully. Verification email sent!',
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                rewardsNumber: newUser.rewardsNumber,
+                organizationId: newUser.organizationId,
+                status: newUser.status,
+            },
+        });
+    } catch (err) {
+        console.error('Error registering rewards user:', err);
+        res.status(500).json({ error: 'Failed to register rewards user.' });
+    }
+});
+
+/**
+ * Log in a rewards program user.
+ */
+router.post('/rewards/login', async (req, res) => {
+    const { email, password } = req.body;
+    const { apikey: apiKey } = req.headers;
+
+    if (!email || !password || !apiKey) {
+        return res.status(400).json({ error: 'Email, password, and API key are required.' });
+    }
+
+    try {
+        // Find organization by API key
+        const organization = await Organization.findOne({ where: { apiKey } });
+        if (!organization) {
+            return res.status(401).json({ error: 'Invalid API key.' });
+        }
+
+        // Find rewards user
+        const user = await User.findOne({
+            where: { email, organizationId: organization.id, role: 'rewards_user' }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        // Verify the password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid credentials.' });
+        }
+
+        // Generate JWT for the rewards user
+        const token = generateToken(user);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+            maxAge: 60 * 60 * 1000, // 1 hour
+            path: '/',
+        });
+
+        res.status(200).json({
+            message: 'Login successful.',
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                rewardsNumber: user.rewardsNumber,
+                organizationId: user.organizationId,
+            },
+        });
+    } catch (err) {
+        console.error('Error logging in rewards user:', err);
+        res.status(500).json({ error: 'Failed to log in rewards user.' });
     }
 });
 

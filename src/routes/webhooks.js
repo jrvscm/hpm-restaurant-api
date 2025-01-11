@@ -28,8 +28,6 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
                     return res.status(400).send('No rewards number provided in description.');
                 }
 
-                console.log(`Rewards number found: ${rewardsNumber}`);
-
                 // Process rewards logic
                 await handleRewardsLogic(rewardsNumber, paymentIntent.amount, paymentIntent.id);
 
