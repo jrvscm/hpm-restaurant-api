@@ -16,8 +16,7 @@ cron.schedule('0 0 * * *', async () => {
           date: {
             [Op.lt]: twentyFourHoursAgo,  // Reservations older than 24 hours
           },
-          status: { [Op.not]: 'cancelled' },  // Do not archive cancelled reservations
-          archived: false,  // Only archive non-archived reservations
+          archived: false  // Only archive non-archived reservations
         },
       }
     );
