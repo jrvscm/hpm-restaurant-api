@@ -83,7 +83,7 @@ router.post('/register/organization', async (req, res) => {
         });
 
         // Construct the verification email
-        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
+        const verificationUrl = `${process.env.FRONTEND_URL}/backend/auth/verify/${verificationToken}`;
         if (process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
         } else {
@@ -240,33 +240,34 @@ router.post('/login', async (req, res) => {
  */
 router.get('/verify/:token', async (req, res) => {
     try {
-      const { token } = req.params;
+        const { token } = req.params;
+    
+        const user = await User.findOne({ where: { verificationToken: token } });
+    
+        if (!user) {
+            return res.redirect(`${process.env.FRONTEND_URL}/verification?failed=1`);
+        }
+    
+        user.status = 'verified';
+        user.verificationToken = null;
+        await user.save();
+    
+        const updatedToken = generateToken({
+            id: user.id,
+            role: user.role,
+            organizationId: user.organizationId,
+            status: user.status,
+        });
   
-      const user = await User.findOne({ where: { verificationToken: token } });
-  
-      if (!user) {
-        return res.redirect(`${process.env.FRONTEND_URL}/verification?failed=1`);
-      }
-  
-      user.status = 'verified';
-      user.verificationToken = null;
-      await user.save();
-  
-      const updatedToken = generateToken({
-        id: user.id,
-        role: user.role,
-        organizationId: user.organizationId,
-        status: user.status,
-      });
-  
-      res.cookie('token', updatedToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax', // For cross-domain cookies
-        ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: '/',
-      }); 
+        res.cookie('token', updatedToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax', // For cross-domain cookies
+            ...(process.env.NODE_ENV === 'production' && { domain: '.pizzalander.netlify.app' }),
+            maxAge: 60 * 60 * 1000, // 1 hour
+            path: '/',
+        }); 
+
         const redirectUrl = user.role === 'rewards_user' ? `${process.env.FRONTEND_URL}/rewards/${user.id}` : `${process.env.FRONTEND_URL}/dashboard/reservation`;
         res.redirect(redirectUrl);
     } catch (err) {
@@ -319,7 +320,7 @@ router.post('/resend-verification', async (req, res) => {
         });
 
         // Construct the verification email
-        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
+        const verificationUrl = `${process.env.FRONTEND_URL}/backend/auth/verify/${verificationToken}`;
         if(process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
         } else {
@@ -491,7 +492,7 @@ router.post('/rewards/register', async (req, res) => {
         });
 
         // Send verification email
-        const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
+        const verificationUrl = `${process.env.FRONTEND_URL}/backend/auth/verify/${verificationToken}`;
 
         const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
             host: process.env.SMTP_HOST,
