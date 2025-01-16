@@ -276,8 +276,19 @@ router.get('/verify/:token', async (req, res) => {
  */
 router.post('/resend-verification', async (req, res) => {
     const { email } = req.body;
+    const { apiKey } = req.headers;
+
+    if (!email || !apiKey) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+    }
 
     try {
+        // Find organization by API key
+        const organization = await Organization.findOne({ where: { apiKey } });
+        if (!organization) {
+            return res.status(401).json({ error: 'Invalid API key.' });
+        }
+        
         // Find the user by email
         const user = await User.findOne({ where: { email } });
 
