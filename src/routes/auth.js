@@ -308,7 +308,7 @@ router.post('/resend-verification', async (req, res) => {
             console.log(verificationUrl);
         } else {
             const mailOptions = {
-                from: '"My App" <noreply@myapp.com>', // Sender address
+                from: 'jarvis@highplainsmedia.com', // Sender address
                 to: email, // Recipient email
                 subject: 'Resend Verification Email',
                 text: `You requested to resend your verification email. Please verify your account by clicking the following link: ${verificationUrl}`,
