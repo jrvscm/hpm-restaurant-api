@@ -84,7 +84,7 @@ router.post('/register/organization', async (req, res) => {
             console.log(verificationUrl);
         } else {
             const mailOptions = {
-                from: '"My App" <noreply@myapp.com>', // Sender address
+                from: 'jarvis@highplainsmedia.com', // Sender address
                 to: email, // Recipient email
                 subject: 'Verify Your Account',
                 text: `Welcome to ${organizationName}! Please verify your account by clicking the following link: ${verificationUrl}`,
@@ -306,19 +306,20 @@ router.post('/resend-verification', async (req, res) => {
         const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
         if(process.env.NODE_ENV === 'development') {
             console.log(verificationUrl);
-        }
-        const mailOptions = {
-            from: '"My App" <noreply@myapp.com>', // Sender address
-            to: email, // Recipient email
-            subject: 'Resend Verification Email',
-            text: `You requested to resend your verification email. Please verify your account by clicking the following link: ${verificationUrl}`,
-            html: `<p>You requested to resend your verification email.</p>
-                   <p>Please verify your account by clicking the link below:</p>
-                   <a href="${verificationUrl}">${verificationUrl}</a>`,
-        };
+        } else {
+            const mailOptions = {
+                from: '"My App" <noreply@myapp.com>', // Sender address
+                to: email, // Recipient email
+                subject: 'Resend Verification Email',
+                text: `You requested to resend your verification email. Please verify your account by clicking the following link: ${verificationUrl}`,
+                html: `<p>You requested to resend your verification email.</p>
+                    <p>Please verify your account by clicking the link below:</p>
+                    <a href="${verificationUrl}">${verificationUrl}</a>`,
+            };
 
-        // Send the email
-        await transporter.sendMail(mailOptions);
+            // Send the email
+            await transporter.sendMail(mailOptions);
+        }
 
         res.status(200).json({ message: 'Verification email resent successfully.' });
     } catch (err) {
@@ -475,21 +476,20 @@ router.post('/rewards/register', async (req, res) => {
 
         // Send verification email
         const verificationUrl = `${process.env.API_BASE_URL}/auth/verify/${verificationToken}`;
-        if (process.env.NODE_ENV === 'development') {
-            console.log(`Verification link: ${verificationUrl}`);
-        } else {
-            const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT,
-                secure: process.env.SMTP_SECURE === 'true',
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                },
-            });
 
+        const transporter = process.env.NODE_ENV === 'development' ? {} : nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+
+        if(process.env.NODE_ENV !== 'development') {
             const mailOptions = {
-                from: '"Rewards Program" <noreply@rewards.com>',
+                from: 'jarvis@highplainsmedia.com',
                 to: email,
                 subject: 'Verify Your Account',
                 text: `Welcome to our rewards program! Please verify your account by clicking the link: ${verificationUrl}`,
@@ -499,7 +499,10 @@ router.post('/rewards/register', async (req, res) => {
             };
 
             await transporter.sendMail(mailOptions);
+        } else {
+            console.log(verificationUrl);
         }
+
 
         res.status(201).json({
             message: 'Rewards user registered successfully. Verification email sent!',
