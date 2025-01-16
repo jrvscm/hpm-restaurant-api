@@ -42,7 +42,10 @@ router.post('/register/organization', async (req, res) => {
 
         // Generate a verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
-
+        
+        //Generate rewardsid for user
+        const rewardsId = `RADMIN${Math.floor(10000 + Math.random() * 90000)}`;
+        
         // Create the admin user
         const admin = await User.create({
             email,
@@ -51,6 +54,7 @@ router.post('/register/organization', async (req, res) => {
             role: 'admin',
             status: 'pending',
             organizationId: organization.id,
+            rewardsNumber: rewardsId,
             phone,
             verificationToken,
         });
