@@ -263,10 +263,10 @@ router.get('/verify/:token', async (req, res) => {
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/',
       }); 
-  
-        res.redirect(`${process.env.FRONTEND_URL}/verification?success=1`);
+
+        res.redirect(`${process.env.FRONTEND_URL}/verification`);
     } catch (err) {
-      res.redirect(`${process.env.FRONTEND_URL}/verification?failed=1`);
+        res.redirect(`${process.env.FRONTEND_URL}/verification`);
     }
   });
   
