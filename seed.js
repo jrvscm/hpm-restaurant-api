@@ -68,7 +68,7 @@ const seedDatabase = async () => {
                 fullName: 'Regular User',
                 email: 'user@example.com',
                 password: hashedUserPassword,
-                role: 'user',
+                role: 'rewards_user',
                 organizationId: organization.id,
                 status: 'verified',
                 verificationToken: null,
