@@ -267,10 +267,11 @@ router.get('/verify/:token', async (req, res) => {
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/',
       }); 
-
-        res.redirect(`${process.env.FRONTEND_URL}/verification`);
+        const redirectUrl = user.role === 'rewards_user' ? `${process.env.FRONTEND_URL}/rewards/${user.id}` : `${process.env.FRONTEND_URL}/dashboard`;
+        res.redirect(redirectUrl);
     } catch (err) {
-        res.redirect(`${process.env.FRONTEND_URL}/verification`);
+        const redirectUrl = user.role === 'rewards_user' ? `${process.env.FRONTEND_URL}/rewards/signin` : `${process.env.FRONTEND_URL}/signin`;
+        res.redirect(redirectUrl);
     }
   });
   
