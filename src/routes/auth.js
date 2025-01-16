@@ -177,7 +177,7 @@ router.post('/invite', authenticate, authorize(['admin']), async (req, res) => {
             verificationToken,
         });
 
-        console.log(`Invitation email sent: http://your-frontend-url.com/register/invite/${verificationToken}`);
+        // console.log(`Invitation email sent: http://your-frontend-url.com/register/invite/${verificationToken}`);
 
         res.status(201).json({ message: `Invitation sent to ${email}.` });
     } catch (err) {
@@ -353,7 +353,7 @@ router.post('/reset', async (req, res) => {
         user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        console.log(`Password reset link: http://your-frontend-url.com/reset/${resetToken}`);
+        // console.log(`Password reset link: http://your-frontend-url.com/reset/${resetToken}`);
 
         res.status(200).json({ message: 'Password reset link sent to email.' });
     } catch (err) {

@@ -40,7 +40,7 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
         }
 
         default:
-            console.log(`Unhandled event type: ${event.type}`);
+            console.error(`Unhandled event type: ${event.type}`);
             res.status(200).send({ received: true });
             break;
     }
@@ -54,7 +54,6 @@ async function handleRewardsLogic(rewardsNumber, amount, paymentIntentId) {
 
     const poinstPerDollar = .1;
     const pointsEarned = Math.floor((amount / 100) * poinstPerDollar); 
-    console.log(`Adding ${pointsEarned} points to user ${user.id}`);
 
     // Update the user's points
     let loyaltyRecord = await UserPoints.findOne({ where: { userId: user.id } });
@@ -80,8 +79,6 @@ async function handleRewardsLogic(rewardsNumber, amount, paymentIntentId) {
         points: pointsEarned,
         description: `Points earned for payment intent: ${paymentIntentId}`,
     });
-
-    console.log(`Successfully added ${pointsEarned} points for user ${user.id}`);
 }
 
 module.exports = router;
